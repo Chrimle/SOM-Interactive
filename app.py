@@ -22,11 +22,13 @@ app_ui = ui.page_fluid(
 def server(input, output, session):
     @render.plot
     def survey_plot():
-        # Filter data based on dropdown selection
-        filtered_df = df[df["Svarsalternativ"] == input.category()].sort_values("År")
+        # Pivot the dataframe so Years are the index and Categories are the columns.
+        plot_df = df.pivot(index="År", columns="Svarsalternativ", values="Procent")
 
         fig, ax = plt.subplots(figsize=(8, 5))
-        bars = ax.bar(filtered_df["År"].astype(str), filtered_df["Procent"], color="royalblue", edgecolor="black")
+
+        # Plot as Stacked Bar-graph
+        plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", colormap="tab10")
 
         # Add labels and styling
         ax.set_ylabel("Procent (%)")
@@ -34,8 +36,17 @@ def server(input, output, session):
         ax.set_ylim(0, 100)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
-        # Add percentage values on top of each bar
-        ax.bar_label(bars, fmt='%d%%', padding=3)
+        # Move the legend outside the plot area so it doesn't cover the bars
+        ax.legend(title="Svarsalternativ", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+        # Add percentage values inside each stacked section
+        for container in ax.containers:
+            # label_type='center' puts the text in the middle of that specific block
+            ax.bar_label(container, fmt='%d%%', label_type='center')
+
+        # Ensure the external legend doesn't get cut off when rendered in Shiny
+        fig.tight_layout()
+
         return fig
 
 app = App(app_ui, server)
