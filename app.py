@@ -45,8 +45,12 @@ def server(input, output, session):
     @render.plot
     def survey_plot():
         df, meta = current_dataset()
+        # Labels
+        choice_col_label = df.columns[meta.choice_col_index]
+        value_col_label = df.columns[meta.value_col_index]
+        time_col_label = df.columns[meta.time_col_index]
         # Pivot the dataframe so Years are the index and Categories are the columns.
-        plot_df = df.pivot(index=meta.time_col, columns=meta.choice_col, values=meta.value_col)
+        plot_df = df.pivot(index=time_col_label, columns=choice_col_label, values=value_col_label)
 
         fig, ax = plt.subplots(figsize=(8, 5))
 
@@ -66,13 +70,13 @@ def server(input, output, session):
         plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", color=custom_colors)
 
         # Add labels and styling
-        ax.set_ylabel(meta.value_col + " (" + meta.value_unit + ")")
-        ax.set_xlabel(meta.time_col)
+        ax.set_ylabel(value_col_label + " (" + meta.value_unit + ")")
+        ax.set_xlabel(time_col_label)
         ax.set_ylim(0, 100)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
         # Move the legend outside the plot area so it doesn't cover the bars
-        ax.legend(title=meta.choice_col, bbox_to_anchor=(1.05, 1), loc='upper left')
+        ax.legend(title=choice_col_label, bbox_to_anchor=(1.05, 1), loc='upper left')
 
         # Add percentage values inside each stacked section
         for container in ax.containers:

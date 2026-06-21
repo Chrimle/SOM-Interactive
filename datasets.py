@@ -7,10 +7,10 @@ from pathlib import Path
 class Metadata:
     title: str
     file_path: Path
-    choice_col: str
-    value_col: str
+    choice_col_index: int
+    value_col_index: int
     value_unit: str
-    time_col: str
+    time_col_index: int
     survey_id: str
 
 
@@ -18,10 +18,10 @@ DATASETS: dict[str, Metadata] = {
     "DtKn8nRSgTxsq8": Metadata(
         title="Förslag: Införa sextimmars arbetsdag",
         file_path=Path(__file__).parent / "data" / "DtKn8nRSgTxsq8" / "data.csv",
-        choice_col="Svarsalternativ",
-        value_col="Procent",
+        choice_col_index=1,
+        value_col_index=2,
         value_unit="%",
-        time_col="År",
+        time_col_index=0,
         survey_id="DtKn8nRSgTxsq8"
     )
 }
