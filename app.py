@@ -15,7 +15,6 @@ app_ui = ui.page_fluid(
     ui.p("This is a WIP project to interact with SOM-data!"),
     ui.hr(),
     ui.h3("Förslag: Införa sextimmars arbetsdag"),
-    ui.input_select("category", "Välj svarsalternativ:", choices=categories),
     ui.output_plot("survey_plot"),
 )
 
