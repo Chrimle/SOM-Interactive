@@ -26,8 +26,20 @@ def server(input, output, session):
 
         fig, ax = plt.subplots(figsize=(8, 5))
 
+        # Configuring Color-coding answers...
+        correct_order = ["Mycket bra förslag", "Ganska bra förslag", "Varken bra eller dåligt förslag", "Ganska dåligt förslag", "Mycket dåligt förslag"]
+        existing_order = [cat for cat in correct_order if cat in plot_df.columns]
+        plot_df = plot_df[existing_order]
+        custom_colors = [
+            "#2e7d32",  # Dark Green
+            "#81c784",  # Light Green
+            "#b0bec5",  # Gray
+            "#ef9a9a",  # Light Red
+            "#c62828"   # Dark Red
+        ]
+
         # Plot as Stacked Bar-graph
-        plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", colormap="tab10")
+        plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", color=custom_colors)
 
         # Add labels and styling
         ax.set_ylabel("Procent (%)")
