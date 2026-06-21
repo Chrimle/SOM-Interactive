@@ -16,7 +16,7 @@ app_ui = ui.page_fluid(
     ),
     ui.hr(),
     ui.input_select("selected_survey", "Välj undersökning:", choices=SURVEY_CHOICES),
-    ui.h3("Förslag: Införa sextimmars arbetsdag"),
+    ui.output_ui("selected_survey_ui"),
     ui.output_plot("survey_plot"),
 )
 
@@ -27,6 +27,11 @@ def server(input, output, session):
         meta = DATASETS[input.selected_survey()]
         df = pd.read_csv(meta.file_path, encoding="utf-8")
         return df, meta
+
+    @render.ui
+    def selected_survey_ui():
+        df, meta = current_dataset()
+        return ui.h3(meta.title)
 
     @render.plot
     def survey_plot():
