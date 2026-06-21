@@ -13,6 +13,11 @@ categories = list(df["Svarsalternativ"].unique())
 app_ui = ui.page_fluid(
     ui.h2("SOM Interactive"),
     ui.p("This is a WIP project to interact with SOM-data!"),
+    ui.p(
+        "Visit the ",
+        ui.a("SOM Interactive", href="https://github.com/Chrimle/SOM-Interactive", target="_blank"),
+        " GitHub Project for feedback and/or requests."
+    ),
     ui.hr(),
     ui.h3("Förslag: Införa sextimmars arbetsdag"),
     ui.output_plot("survey_plot"),
