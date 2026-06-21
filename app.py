@@ -11,7 +11,7 @@ df = pd.read_csv(csv_path, encoding="utf-8")
 categories = list(df["Svarsalternativ"].unique())
 
 app_ui = ui.page_fluid(
-    ui.h2("SOM Interactive"),
+    ui.panel_title("SOM Interactive", window_title="SOM Interactive"),
     ui.p("This is a WIP project to interact with SOM-data!"),
     ui.hr(),
     ui.h3("Förslag: Införa sextimmars arbetsdag"),
