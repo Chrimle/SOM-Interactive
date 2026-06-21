@@ -18,10 +18,11 @@ app_ui = ui.page_fluid(
     ui.input_select("selected_survey", "Välj undersökning:", choices=SURVEY_CHOICES),
     ui.output_ui("selected_survey_ui"),
     ui.output_plot("survey_plot"),
+    ui.output_ui("survey_source_ui")
 )
 
-def server(input, output, session):
 
+def server(input, output, session):
     @reactive.calc
     def current_dataset() -> tuple[pd.DataFrame, Metadata]:
         meta = DATASETS[input.selected_survey()]
@@ -32,6 +33,14 @@ def server(input, output, session):
     def selected_survey_ui():
         df, meta = current_dataset()
         return ui.h3(meta.title)
+
+    @render.ui
+    def survey_source_ui():
+        df, meta = current_dataset()
+        return ui.p(
+            "Källa till data: ",
+            ui.a("SOM Institutet", href="https://som-institutet.se/dataanalys?m=item_" + meta.survey_id, target="_blank")
+        )
 
     @render.plot
     def survey_plot():
@@ -50,7 +59,7 @@ def server(input, output, session):
             "#81c784",  # Light Green
             "#b0bec5",  # Gray
             "#ef9a9a",  # Light Red
-            "#c62828"   # Dark Red
+            "#c62828"  # Dark Red
         ]
 
         # Plot as Stacked Bar-graph
@@ -74,5 +83,6 @@ def server(input, output, session):
         fig.tight_layout()
 
         return fig
+
 
 app = App(app_ui, server)

@@ -11,6 +11,7 @@ class Metadata:
     value_col: str
     value_unit: str
     time_col: str
+    survey_id: str
 
 
 DATASETS: dict[str, Metadata] = {
@@ -20,6 +21,7 @@ DATASETS: dict[str, Metadata] = {
         choice_col="Svarsalternativ",
         value_col="Procent",
         value_unit="%",
-        time_col="År"
+        time_col="År",
+        survey_id="DtKn8nRSgTxsq8"
     )
 }
