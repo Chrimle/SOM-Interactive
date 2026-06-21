@@ -6,3 +6,6 @@
 
 ## Table of Contents
 - [`data.csv`](data.csv) - total / year
+  - Per Gender
+    - [`data-kvinna.csv`](gender/data-kvinna.csv) - total / year (Woman)
+    - [`data-man.csv`](gender/data-man.csv) - total / year (Man)
