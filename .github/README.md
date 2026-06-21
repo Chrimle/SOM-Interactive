@@ -1,12 +1,12 @@
 # SOM-Interactive
 Interact with [SOM Institute](https://www.gu.se/som-institutet) Data!
 
-> [!CAUTION]
+> [!IMPORTANT]
 > This project is not associated, endorsed or affiliated with the SOM Institute.
 > 
-> This project relies on publicized data by the SOM Institute.
+> This project relies on publicized data by the SOM Institute. ❤️
 
-> [!TIP]
+> [!NOTE]
 > This is a complement to [SOM Institute's Analysis Tool](https://som-institutet.se/dataanalys).
 
 ### Dev Notes
