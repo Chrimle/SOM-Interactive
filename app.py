@@ -8,7 +8,6 @@ SURVEY_CHOICES = {key: meta.title for key, meta in DATASETS.items()}
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
-        ui.h3("SOM Interactive"),
         ui.p("This is a WIP project to interact with SOM-data!"),
         ui.hr(),
         ui.input_select("selected_survey", "Välj undersökning:", choices=SURVEY_CHOICES),
