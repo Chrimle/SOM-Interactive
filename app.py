@@ -126,7 +126,7 @@ def server(input, output, session):
         value_col_label = df.columns[meta.value_col_index]
         time_col_label = df.columns[meta.time_col_index]
         # Pivot the dataframe so Years are the index and Categories are the columns.
-        plot_df = df.pivot(index=time_col_label, columns=choice_col_label, values=value_col_label)
+        plot_df = df.pivot_table(index=time_col_label, columns=choice_col_label, values=value_col_label)
 
         fig, ax = plt.subplots(figsize=(8, 5))
 
