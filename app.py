@@ -80,10 +80,6 @@ def server(input, output, session):
         return df, meta
 
     @render.ui
-    def sidebar_header():
-        return ui.h3(translate("title"))
-
-    @render.ui
     def sidebar_subtitle():
         return ui.p(translate("subtitle"))
 
