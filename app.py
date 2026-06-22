@@ -6,8 +6,26 @@ from datasets import DATASETS, Metadata
 
 SURVEY_CHOICES = {key: meta.title for key, meta in DATASETS.items()}
 
-app_ui = ui.page_fluid(
+app_ui = ui.page_sidebar(
+    ui.sidebar(
+        ui.h3("SOM Interactive"),
+        ui.p("This is a WIP project to interact with SOM-data!"),
+        ui.hr(),
+        ui.input_select("selected_survey", "Välj undersökning:", choices=SURVEY_CHOICES),
+        ui.hr(),
+        ui.p(
+            "Visit the ",
+            ui.a("SOM Interactive", href="https://github.com/Chrimle/SOM-Interactive", target="_blank", class_="fw-bold text-decoration-none"),
+            " GitHub Project for feedback and/or requests.",
+            class_="text-muted small"
+        ),
+        bg="#f8f9fa"
+    ),
     ui.head_content(
+        ui.tags.link(
+            rel="stylesheet",
+            href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css"
+        ),
         ui.HTML("""
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJPKJ5B6W7"></script>
         <script>
@@ -19,18 +37,17 @@ app_ui = ui.page_fluid(
         </script>
         """)
     ),
-    ui.h2("SOM Interactive"),
-    ui.p("This is a WIP project to interact with SOM-data!"),
-    ui.p(
-        "Visit the ",
-        ui.a("SOM Interactive", href="https://github.com/Chrimle/SOM-Interactive", target="_blank"),
-        " GitHub Project for feedback and/or requests."
+    ui.card(
+        ui.card_header(
+            ui.output_ui("selected_survey_ui")
+        ),
+        ui.output_plot("survey_plot"),
+        ui.card_footer(
+            ui.output_ui("survey_source_ui")
+        ),
+        full_screen=True
     ),
-    ui.hr(),
-    ui.input_select("selected_survey", "Välj undersökning:", choices=SURVEY_CHOICES),
-    ui.output_ui("selected_survey_ui"),
-    ui.output_plot("survey_plot"),
-    ui.output_ui("survey_source_ui")
+    title="SOM Interactive"
 )
 
 
@@ -44,14 +61,19 @@ def server(input, output, session):
     @render.ui
     def selected_survey_ui():
         df, meta = current_dataset()
-        return ui.h3(meta.title)
+        return ui.h5(meta.title, class_="m-0")
 
     @render.ui
     def survey_source_ui():
         df, meta = current_dataset()
         return ui.p(
             "Källa till data: ",
-            ui.a("SOM Institutet", href="https://som-institutet.se/dataanalys?m=item_" + meta.survey_id, target="_blank")
+            ui.a(
+                "SOM Institutet",
+                href=f"https://som-institutet.se/dataanalys?m=item_{meta.survey_id}",
+                target="_blank"
+            ),
+            class_="m-0 small text-muted"
         )
 
     @render.plot
