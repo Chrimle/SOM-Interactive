@@ -4,20 +4,38 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datasets import DATASETS, Metadata
 
+I18N = {
+    "sv": {
+        "subtitle": "Detta är ett pågående projekt för att interagera med SOM-data!",
+        "survey_label": "Välj undersökning:",
+        "source_label": "Källa till data:",
+        "github_text": "Besök projektet på GitHub för feedback och önskemål."
+    },
+    "en": {
+        "subtitle": "This is a WIP project to interact with SOM data!",
+        "survey_label": "Select survey:",
+        "source_label": "Data source:",
+        "github_text": "Visit the GitHub project for feedback and requests."
+    }
+}
+
 SURVEY_CHOICES = {key: meta.title for key, meta in DATASETS.items()}
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
-        ui.p("This is a WIP project to interact with SOM-data!"),
-        ui.hr(),
-        ui.input_select("selected_survey", "Välj undersökning:", choices=SURVEY_CHOICES),
-        ui.hr(),
-        ui.p(
-            "Visit the ",
-            ui.a("SOM Interactive", href="https://github.com/Chrimle/SOM-Interactive", target="_blank", class_="fw-bold text-decoration-none"),
-            " GitHub Project for feedback and/or requests.",
-            class_="text-muted small"
+        ui.input_radio_buttons(
+            "lang",
+            None,
+            choices={"sv": "🇸🇪 Svenska", "en": "🇬🇧 English"},
+            selected="sv",
+            inline=True
         ),
+        ui.hr(),
+        ui.output_ui("sidebar_subtitle"),
+        ui.hr(),
+        ui.output_ui("survey_selector_container"),
+        ui.hr(),
+        ui.output_ui("github_link"),
         bg="#f8f9fa"
     ),
     ui.head_content(
@@ -51,6 +69,10 @@ app_ui = ui.page_sidebar(
 
 
 def server(input, output, session):
+    # A helper function to quickly look up translations
+    def translate(key: str) -> str:
+        return I18N[input.lang()][key]
+
     @reactive.calc
     def current_dataset() -> tuple[pd.DataFrame, Metadata]:
         meta = DATASETS[input.selected_survey()]
@@ -58,15 +80,40 @@ def server(input, output, session):
         return df, meta
 
     @render.ui
+    def sidebar_header():
+        return ui.h3(translate("title"))
+
+    @render.ui
+    def sidebar_subtitle():
+        return ui.p(translate("subtitle"))
+
+    @render.ui
     def selected_survey_ui():
         df, meta = current_dataset()
         return ui.h5(meta.title, class_="m-0")
 
     @render.ui
+    def survey_selector_container():
+        return ui.input_select(
+            "selected_survey",
+            translate("survey_label"),
+            choices=SURVEY_CHOICES
+        )
+
+    @render.ui
+    def github_link():
+        return ui.p(
+            ui.a("GitHub Project", href="https://github.com/Chrimle/SOM-Interactive", target="_blank", class_="fw-bold text-decoration-none"),
+            f" - {translate('github_text')}",
+            class_="text-muted small"
+        )
+
+    # Update your existing footer to use the translated label too!
+    @render.ui
     def survey_source_ui():
         df, meta = current_dataset()
         return ui.p(
-            "Källa till data: ",
+            f"{translate('source_label')} ",
             ui.a(
                 "SOM Institutet",
                 href=f"https://som-institutet.se/dataanalys?m=item_{meta.survey_id}",
