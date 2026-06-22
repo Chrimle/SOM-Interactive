@@ -7,6 +7,18 @@ from datasets import DATASETS, Metadata
 SURVEY_CHOICES = {key: meta.title for key, meta in DATASETS.items()}
 
 app_ui = ui.page_fluid(
+    ui.head_content(
+        ui.HTML("""
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJPKJ5B6W7"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-DJPKJ5B6W7');
+        </script>
+        """)
+    ),
     ui.h2("SOM Interactive"),
     ui.p("This is a WIP project to interact with SOM-data!"),
     ui.p(
