@@ -6,17 +6,17 @@ from datasets import DATASETS, Metadata
 
 I18N = {
     "sv": {
-        "subtitle": "Detta är ett pågående projekt för att interagera med SOM-data!",
+        "subtitle": "Interagera med data från SOM Institutet! Detta är ett projekt under konstruktion.",
         "survey_label": "Välj undersökning:",
         "source_label": "Källa till data:",
-        "github_text": "Besök projektet på GitHub för feedback och önskemål.",
+        "github_text": "Lämna feedback och förslag på projektet här",
         "year_label": "Välj tidsperiod:",
     },
     "en": {
-        "subtitle": "This is a WIP project to interact with SOM data!",
+        "subtitle": "Interact with data from the SOM Institute! This project is Work-in-Progress.",
         "survey_label": "Select survey:",
         "source_label": "Data source:",
-        "github_text": "Visit the GitHub project for feedback and requests.",
+        "github_text": "Leave feedback and suggestions on the project here",
         "year_label": "Select time period:",
     }
 }
@@ -129,8 +129,8 @@ def server(input, output, session):
     @render.ui
     def github_link():
         return ui.p(
-            ui.a("GitHub Project", href="https://github.com/Chrimle/SOM-Interactive", target="_blank", class_="fw-bold text-decoration-none"),
-            f" - {translate('github_text')}",
+            f"{translate('github_text')} - ",
+            ui.a("GitHub", href="https://github.com/Chrimle/SOM-Interactive", target="_blank", class_="fw-bold text-decoration-none"),
             class_="text-muted small"
         )
 
