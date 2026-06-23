@@ -232,7 +232,13 @@ def server(input, output, session):
         # Add labels and styling
         ax.set_ylabel(value_col_label + " (" + meta.value_unit + ")")
         ax.set_xlabel(time_col_label)
-        ax.set_ylim(0, 100)
+
+        # Only lock y-limit to 100 if it's a stacked bar chart (as values total up to 100%)
+        if chart_type == "bar":
+            ax.set_ylim(0, 100)
+        else:
+            ax.set_ylim(0, None)
+
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
         # Move the legend outside the plot area
