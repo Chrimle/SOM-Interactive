@@ -16,6 +16,7 @@ I18N = {
         "chart_type_label": "Välj diagramtyp:",
         "bar_label": "Staplat stapeldiagram",
         "line_label": "Linjediagram",
+        "filter_answers_label": "Visa/dölj svar:",
     },
     "en": {
         "subtitle": "Interact with data from the SOM Institute! This project is Work-in-Progress.",
@@ -27,6 +28,7 @@ I18N = {
         "chart_type_label": "Select chart type:",
         "bar_label": "Stacked bar chart",
         "line_label": "Line chart",
+        "filter_answers_label": "Show/hide answers:",
     }
 }
 
@@ -71,6 +73,7 @@ app_ui = ui.page_sidebar(
         ),
         ui.div(
             ui.output_ui("year_slider_container"),
+            ui.output_ui("answer_filter_container"),
             ui.div(
                 ui.output_ui("chart_type_ui"),
                 ui.output_ui("toggle_labels_ui"),
@@ -159,6 +162,30 @@ def server(input, output, session):
         )
 
     @render.ui
+    def answer_filter_container():
+        df, meta = current_dataset()
+        choice_col_label = df.columns[meta.choice_col_index]
+
+        # Get all unique choices present in the data
+        unique_choices = df[choice_col_label].dropna().unique().tolist()
+
+        # Sort them matching your preferred order layout
+        correct_order = ["Mycket bra förslag", "Ganska bra förslag", "Varken bra eller dåligt förslag", "Ganska dåligt förslag", "Mycket dåligt förslag"]
+        existing_choices = [cat for cat in correct_order if cat in unique_choices]
+
+        # Fallback for unexpected choices
+        other_choices = [cat for cat in unique_choices if cat not in correct_order]
+        final_choices = existing_choices + other_choices
+
+        return ui.input_checkbox_group(
+            "selected_answers",
+            translate("filter_answers_label"),
+            choices={c: c for c in final_choices},
+            selected=final_choices,
+            inline=True
+        )
+
+    @render.ui
     def github_link():
         return ui.p(
             f"{translate('github_text')} - ",
@@ -208,17 +235,27 @@ def server(input, output, session):
 
         fig, ax = plt.subplots(figsize=(8, 5))
 
-        # Configuring Color-coding answers...
+        # Configuring Color-coding answers dynamically...
         correct_order = ["Mycket bra förslag", "Ganska bra förslag", "Varken bra eller dåligt förslag", "Ganska dåligt förslag", "Mycket dåligt förslag"]
         existing_order = [cat for cat in correct_order if cat in plot_df.columns]
+
+        # Apply the user's active answer selections
+        selected_answers = input.selected_answers()
+        if selected_answers:
+            existing_order = [cat for cat in existing_order if cat in selected_answers]
+
+        # Reorder/Filter the dataframe columns
         plot_df = plot_df[existing_order]
-        custom_colors = [
-            "#2e7d32",  # Dark Green
-            "#81c784",  # Light Green
-            "#b0bec5",  # Gray
-            "#ef9a9a",  # Light Red
-            "#c62828"  # Dark Red
-        ]
+
+        # Use a mapping dictionary so colors stay locked to specific answers
+        color_map = {
+            "Mycket bra förslag": "#2e7d32",  # Dark Green
+            "Ganska bra förslag": "#81c784",  # Light Green
+            "Varken bra eller dåligt förslag": "#b0bec5",  # Gray
+            "Ganska dåligt förslag": "#ef9a9a",  # Light Red
+            "Mycket dåligt förslag": "#c62828"  # Dark Red
+        }
+        custom_colors = [color_map.get(cat, "#757575") for cat in plot_df.columns]
 
         chart_type = input.chart_type()
         if chart_type == "bar":
