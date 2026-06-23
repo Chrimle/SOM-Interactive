@@ -70,14 +70,17 @@ app_ui = ui.page_sidebar(
     ui.div(
         ui.output_ui("survey_selector_container"),
         ui.hr(),
-        ui.output_ui("year_slider_container"),
-        ui.output_ui("answer_filter_container"),
         ui.div(
+            ui.div(
+                ui.output_ui("year_slider_container"),
+                style="min-width: 250px;"
+            ),
             ui.output_ui("chart_type_ui"),
             ui.output_ui("toggle_labels_ui"),
             ui.output_ui("toggle_insert_missing_years_ui"),
-            class_="d-flex flex-wrap gap-4 align-items-end mt-2"
+            class_="d-flex flex-wrap gap-4 align-items-center mb-3"
         ),
+        ui.output_ui("answer_filter_container"),
         class_="p-3 mb-3 bg-light rounded shadow-sm",
         style="border-left: 5px solid #2c3e50;"
     ),
@@ -129,8 +132,7 @@ def server(input, output, session):
             "chart_type",
             translate("chart_type_label"),
             choices={"bar": translate("bar_label"), "line": translate("line_label")},
-            selected="bar",
-            inline=True
+            selected="bar"
         )
 
     @render.ui
