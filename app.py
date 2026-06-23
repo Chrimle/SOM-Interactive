@@ -7,7 +7,7 @@ from datasets import DATASETS, Metadata
 
 I18N = {
     "sv": {
-        "subtitle": "Interagera med data från SOM Institutet! Detta är ett projekt under konstruktion.",
+        "subtitle": "Interagera med data från SOM-institutet! ❤️ Detta är ett projekt under konstruktion.",
         "survey_label": "Välj undersökning:",
         "source_label": "Källa till data:",
         "github_text": "Lämna feedback och förslag på projektet här",
@@ -18,9 +18,10 @@ I18N = {
         "line_label": "Linjediagram",
         "filter_answers_label": "Visa/dölj svar:",
         "toggle_insert_missing_years": "Lägg till saknade år",
+        "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
     },
     "en": {
-        "subtitle": "Interact with data from the SOM Institute! This project is Work-in-Progress.",
+        "subtitle": "Interact with data from the SOM-institute! ❤️ This project is Work-in-Progress.",
         "survey_label": "Select survey:",
         "source_label": "Data source:",
         "github_text": "Leave feedback and suggestions on the project here",
@@ -31,6 +32,7 @@ I18N = {
         "line_label": "Line chart",
         "filter_answers_label": "Show/hide answers:",
         "toggle_insert_missing_years": "Insert missing years",
+        "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
     }
 }
 
@@ -47,6 +49,7 @@ app_ui = ui.page_sidebar(
         ),
         ui.hr(),
         ui.output_ui("sidebar_subtitle"),
+        ui.output_ui("disclaimer_ui"),
         ui.hr(),
         ui.output_ui("github_link"),
         bg="#f8f9fa"
@@ -112,6 +115,16 @@ def server(input, output, session):
     @render.ui
     def sidebar_subtitle():
         return ui.p(translate("subtitle"))
+
+    @render.ui
+    def disclaimer_ui():
+        return ui.div(
+            ui.tags.small(
+                translate("disclaimer"),
+                class_="text-muted"
+            ),
+            class_="border-start border-warning ps-2 my-2 bg-light"
+        )
 
     @render.ui
     def selected_survey_ui():
@@ -216,7 +229,7 @@ def server(input, output, session):
         return ui.p(
             f"{translate('source_label')} ",
             ui.a(
-                "SOM Institutet",
+                "SOM-institutet",
                 href=f"https://som-institutet.se/dataanalys?m=item_{meta.survey_id}",
                 target="_blank"
             ),
