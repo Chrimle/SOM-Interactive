@@ -36,9 +36,6 @@ app_ui = ui.page_sidebar(
         ui.output_ui("sidebar_subtitle"),
         ui.hr(),
         ui.output_ui("survey_selector_container"),
-
-        ui.output_ui("year_slider_container"),
-
         ui.hr(),
         ui.output_ui("github_link"),
         bg="#f8f9fa"
@@ -62,6 +59,11 @@ app_ui = ui.page_sidebar(
     ui.card(
         ui.card_header(
             ui.output_ui("selected_survey_ui")
+        ),
+        ui.div(
+            ui.output_ui("year_slider_container"),
+            class_="p-3 mb-3 bg-light rounded shadow-sm",
+            style="border-left: 5px solid #2c3e50;"
         ),
         ui.output_plot("survey_plot"),
         ui.card_footer(
