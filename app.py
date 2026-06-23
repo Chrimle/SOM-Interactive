@@ -17,6 +17,7 @@ I18N = {
         "bar_label": "Staplat stapeldiagram",
         "line_label": "Linjediagram",
         "filter_answers_label": "Visa/dölj svar:",
+        "toggle_insert_missing_years": "Lägg till saknade år",
     },
     "en": {
         "subtitle": "Interact with data from the SOM Institute! This project is Work-in-Progress.",
@@ -29,6 +30,7 @@ I18N = {
         "bar_label": "Stacked bar chart",
         "line_label": "Line chart",
         "filter_answers_label": "Show/hide answers:",
+        "toggle_insert_missing_years": "Insert missing years",
     }
 }
 
@@ -77,6 +79,7 @@ app_ui = ui.page_sidebar(
             ui.div(
                 ui.output_ui("chart_type_ui"),
                 ui.output_ui("toggle_labels_ui"),
+                ui.output_ui("toggle_insert_missing_years_ui"),
                 class_="d-flex flex-wrap gap-4 align-items-end mt-2"
             ),
             class_="p-3 mb-3 bg-light rounded shadow-sm",
@@ -135,6 +138,14 @@ def server(input, output, session):
         return ui.input_switch(
             "show_labels",
             translate("toggle_labels"),
+            value=True
+        )
+
+    @render.ui
+    def toggle_insert_missing_years_ui():
+        return ui.input_switch(
+            "insert_missing_years",
+            translate("toggle_insert_missing_years"),
             value=True
         )
 
@@ -224,13 +235,15 @@ def server(input, output, session):
 
         # - Insert Missing Years & Re-index -
         plot_df.index = plot_df.index.astype(int)
-        if year_range is not None:
-            full_years = range(year_range[0], year_range[1] + 1)
-        elif not plot_df.empty:
-            full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
-        else:
-            full_years = []
-        plot_df = plot_df.reindex(full_years)
+        # Only re-index to add empty years if the toggle is checked
+        if input.insert_missing_years():
+            if year_range is not None:
+                full_years = range(year_range[0], year_range[1] + 1)
+            elif not plot_df.empty:
+                full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
+            else:
+                full_years = []
+            plot_df = plot_df.reindex(full_years)
         # ------------------------------------
 
         fig, ax = plt.subplots(figsize=(8, 5))
