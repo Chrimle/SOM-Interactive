@@ -128,6 +128,14 @@ def server(input, output, session):
         # Pivot the dataframe so Years are the index and Categories are the columns.
         plot_df = df.pivot_table(index=time_col_label, columns=choice_col_label, values=value_col_label)
 
+        # - Insert Missing Years & Re-index -
+        plot_df.index = plot_df.index.astype(int)
+        min_year = plot_df.index.min()
+        max_year = plot_df.index.max()
+        full_years = range(min_year, max_year + 1)
+        plot_df = plot_df.reindex(full_years)
+        # ------------------------------------
+
         fig, ax = plt.subplots(figsize=(8, 5))
 
         # Configuring Color-coding answers...
@@ -156,8 +164,8 @@ def server(input, output, session):
 
         # Add percentage values inside each stacked section
         for container in ax.containers:
-            # label_type='center' puts the text in the middle of that specific block
-            ax.bar_label(container, fmt='%d%%', label_type='center')
+            labels = [f"{int(v.get_height())}%" if v.get_height() > 0 else "" for v in container]
+            ax.bar_label(container, labels=labels, label_type='center')
 
         # Ensure the external legend doesn't get cut off when rendered in Shiny
         fig.tight_layout()
