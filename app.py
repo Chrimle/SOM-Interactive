@@ -9,13 +9,15 @@ I18N = {
         "subtitle": "Detta är ett pågående projekt för att interagera med SOM-data!",
         "survey_label": "Välj undersökning:",
         "source_label": "Källa till data:",
-        "github_text": "Besök projektet på GitHub för feedback och önskemål."
+        "github_text": "Besök projektet på GitHub för feedback och önskemål.",
+        "year_label": "Välj tidsperiod:",
     },
     "en": {
         "subtitle": "This is a WIP project to interact with SOM data!",
         "survey_label": "Select survey:",
         "source_label": "Data source:",
-        "github_text": "Visit the GitHub project for feedback and requests."
+        "github_text": "Visit the GitHub project for feedback and requests.",
+        "year_label": "Select time period:",
     }
 }
 
@@ -34,6 +36,9 @@ app_ui = ui.page_sidebar(
         ui.output_ui("sidebar_subtitle"),
         ui.hr(),
         ui.output_ui("survey_selector_container"),
+
+        ui.output_ui("year_slider_container"),
+
         ui.hr(),
         ui.output_ui("github_link"),
         bg="#f8f9fa"
@@ -97,6 +102,29 @@ def server(input, output, session):
         )
 
     @render.ui
+    def year_slider_container():
+        df, meta = current_dataset()
+        time_col_label = df.columns[meta.time_col_index]
+
+        # Determine the min and max years in the current dataset
+        min_year = int(df[time_col_label].min())
+        max_year = int(df[time_col_label].max())
+
+        # Don't show a slider if there is only one year of data
+        if min_year == max_year:
+            return None
+
+        return ui.input_slider(
+            "year_range",
+            translate("year_label"),
+            min=min_year,
+            max=max_year,
+            value=(min_year, max_year),
+            step=1,
+            sep=""
+        )
+
+    @render.ui
     def github_link():
         return ui.p(
             ui.a("GitHub Project", href="https://github.com/Chrimle/SOM-Interactive", target="_blank", class_="fw-bold text-decoration-none"),
@@ -104,7 +132,6 @@ def server(input, output, session):
             class_="text-muted small"
         )
 
-    # Update your existing footer to use the translated label too!
     @render.ui
     def survey_source_ui():
         df, meta = current_dataset()
@@ -125,14 +152,25 @@ def server(input, output, session):
         choice_col_label = df.columns[meta.choice_col_index]
         value_col_label = df.columns[meta.value_col_index]
         time_col_label = df.columns[meta.time_col_index]
-        # Pivot the dataframe so Years are the index and Categories are the columns.
+
+        # NEW: Filter the dataframe based on the slider input (if it exists)
+        # We need this `is not None` check because the plot might try to render
+        # a fraction of a second before the dynamic slider initializes.
+        year_range = input.year_range()
+        if year_range is not None:
+            df = df[(df[time_col_label] >= year_range[0]) & (df[time_col_label] <= year_range[1])]
+
+        # Pivot the dataframe
         plot_df = df.pivot_table(index=time_col_label, columns=choice_col_label, values=value_col_label)
 
         # - Insert Missing Years & Re-index -
         plot_df.index = plot_df.index.astype(int)
-        min_year = plot_df.index.min()
-        max_year = plot_df.index.max()
-        full_years = range(min_year, max_year + 1)
+        if year_range is not None:
+            full_years = range(year_range[0], year_range[1] + 1)
+        elif not plot_df.empty:
+            full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
+        else:
+            full_years = []
         plot_df = plot_df.reindex(full_years)
         # ------------------------------------
 
