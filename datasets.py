@@ -78,6 +78,15 @@ DATASETS: dict[str, Metadata] = {
         time_col_index=0,
         survey_id="kNH0jjogKxb2yo"
     ),
+    "u2FlGAaCPdtXZ0": Metadata(
+        title="Förslag: Satsa mer på ett miljövänligt samhälle",
+        file_path=Path(__file__).parent / "data" / "u2FlGAaCPdtXZ0" / "data.csv",
+        choice_col_index=1,
+        value_col_index=2,
+        value_unit="%",
+        time_col_index=0,
+        survey_id="u2FlGAaCPdtXZ0"
+    ),
     "xvNuEbwvtouNOI": Metadata(
         title="Förslag: Sänka skatterna",
         file_path=Path(__file__).parent / "data" / "xvNuEbwvtouNOI" / "data.csv",
