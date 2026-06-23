@@ -145,11 +145,15 @@ def server(input, output, session):
 
     @render.ui
     def toggle_insert_missing_years_ui():
-        return ui.input_switch(
-            "insert_missing_years",
-            translate("toggle_insert_missing_years"),
-            value=True
-        )
+        chart_type = input.chart_type()
+        if chart_type == "bar":
+            return ui.input_switch(
+                "insert_missing_years",
+                translate("toggle_insert_missing_years"),
+                value=True
+            )
+        else:
+            return None
 
     @render.ui
     def year_slider_container():
@@ -227,6 +231,8 @@ def server(input, output, session):
         value_col_label = df.columns[meta.value_col_index]
         time_col_label = df.columns[meta.time_col_index]
 
+        chart_type = input.chart_type()
+
         # Filter the dataframe based on the slider input (if it exists)
         year_range = input.year_range()
         if year_range is not None:
@@ -238,7 +244,7 @@ def server(input, output, session):
         # - Insert Missing Years & Re-index -
         plot_df.index = plot_df.index.astype(int)
         # Only re-index to add empty years if the toggle is checked
-        if input.insert_missing_years():
+        if input.insert_missing_years() and chart_type == "bar":
             if year_range is not None:
                 full_years = range(year_range[0], year_range[1] + 1)
             elif not plot_df.empty:
@@ -272,7 +278,6 @@ def server(input, output, session):
         }
         custom_colors = [color_map.get(cat, "#757575") for cat in plot_df.columns]
 
-        chart_type = input.chart_type()
         if chart_type == "bar":
             # Plot as Stacked Bar-graph
             plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", color=custom_colors)
