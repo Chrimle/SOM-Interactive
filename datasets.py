@@ -15,6 +15,15 @@ class Metadata:
 
 
 DATASETS: dict[str, Metadata] = {
+    "byd2RYvlxDRhTo": Metadata(
+        title="Förslag: Sänka fyraprocentspärren till riksdagen",
+        file_path=Path(__file__).parent / "data" / "byd2RYvlxDRhTo" / "data.csv",
+        choice_col_index=1,
+        value_col_index=2,
+        value_unit="%",
+        time_col_index=0,
+        survey_id="byd2RYvlxDRhTo"
+    ),
     "dNdVkecX9JRx12": Metadata(
         title="Förslag: Sänka rösträttsåldern till 16 år i alla val",
         file_path=Path(__file__).parent / "data" / "dNdVkecX9JRx12" / "data.csv",
