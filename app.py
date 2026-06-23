@@ -11,6 +11,7 @@ I18N = {
         "source_label": "Källa till data:",
         "github_text": "Lämna feedback och förslag på projektet här",
         "year_label": "Välj tidsperiod:",
+        "toggle_labels": "Visa dataetiketter",
     },
     "en": {
         "subtitle": "Interact with data from the SOM Institute! This project is Work-in-Progress.",
@@ -18,6 +19,7 @@ I18N = {
         "source_label": "Data source:",
         "github_text": "Leave feedback and suggestions on the project here",
         "year_label": "Select time period:",
+        "toggle_labels": "Show data labels",
     }
 }
 
@@ -62,6 +64,7 @@ app_ui = ui.page_sidebar(
         ),
         ui.div(
             ui.output_ui("year_slider_container"),
+            ui.div(ui.output_ui("toggle_labels_ui"), class_="mt-2"),
             class_="p-3 mb-3 bg-light rounded shadow-sm",
             style="border-left: 5px solid #2c3e50;"
         ),
@@ -101,6 +104,14 @@ def server(input, output, session):
             "selected_survey",
             translate("survey_label"),
             choices=SURVEY_CHOICES
+        )
+
+    @render.ui
+    def toggle_labels_ui():
+        return ui.input_switch(
+            "show_labels",
+            translate("toggle_labels"),
+            value=True
         )
 
     @render.ui
@@ -155,9 +166,7 @@ def server(input, output, session):
         value_col_label = df.columns[meta.value_col_index]
         time_col_label = df.columns[meta.time_col_index]
 
-        # NEW: Filter the dataframe based on the slider input (if it exists)
-        # We need this `is not None` check because the plot might try to render
-        # a fraction of a second before the dynamic slider initializes.
+        # Filter the dataframe based on the slider input (if it exists)
         year_range = input.year_range()
         if year_range is not None:
             df = df[(df[time_col_label] >= year_range[0]) & (df[time_col_label] <= year_range[1])]
@@ -202,10 +211,12 @@ def server(input, output, session):
         # Move the legend outside the plot area so it doesn't cover the bars
         ax.legend(title=choice_col_label, bbox_to_anchor=(1.05, 1), loc='upper left')
 
-        # Add percentage values inside each stacked section
-        for container in ax.containers:
-            labels = [f"{int(v.get_height())}%" if v.get_height() > 0 else "" for v in container]
-            ax.bar_label(container, labels=labels, label_type='center')
+        show_labels = input.show_labels()
+        if show_labels is not False:
+            # Add percentage values inside each stacked section
+            for container in ax.containers:
+                labels = [f"{int(v.get_height())}%" if v.get_height() > 0 else "" for v in container]
+                ax.bar_label(container, labels=labels, label_type='center')
 
         # Ensure the external legend doesn't get cut off when rendered in Shiny
         fig.tight_layout()
