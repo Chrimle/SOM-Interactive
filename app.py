@@ -48,8 +48,6 @@ app_ui = ui.page_sidebar(
         ui.hr(),
         ui.output_ui("sidebar_subtitle"),
         ui.hr(),
-        ui.output_ui("survey_selector_container"),
-        ui.hr(),
         ui.output_ui("github_link"),
         bg="#f8f9fa"
     ),
@@ -70,6 +68,8 @@ app_ui = ui.page_sidebar(
         """)
     ),
     ui.div(
+        ui.output_ui("survey_selector_container"),
+        ui.hr(),
         ui.output_ui("year_slider_container"),
         ui.output_ui("answer_filter_container"),
         ui.div(
