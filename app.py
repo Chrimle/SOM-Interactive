@@ -2,6 +2,7 @@ from pathlib import Path
 from shiny import App, render, ui, reactive
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from datasets import DATASETS, Metadata
 
 I18N = {
@@ -12,6 +13,9 @@ I18N = {
         "github_text": "Lämna feedback och förslag på projektet här",
         "year_label": "Välj tidsperiod:",
         "toggle_labels": "Visa dataetiketter",
+        "chart_type_label": "Välj diagramtyp:",
+        "bar_label": "Staplat stapeldiagram",
+        "line_label": "Linjediagram",
     },
     "en": {
         "subtitle": "Interact with data from the SOM Institute! This project is Work-in-Progress.",
@@ -20,6 +24,9 @@ I18N = {
         "github_text": "Leave feedback and suggestions on the project here",
         "year_label": "Select time period:",
         "toggle_labels": "Show data labels",
+        "chart_type_label": "Select chart type:",
+        "bar_label": "Stacked bar chart",
+        "line_label": "Line chart",
     }
 }
 
@@ -64,7 +71,11 @@ app_ui = ui.page_sidebar(
         ),
         ui.div(
             ui.output_ui("year_slider_container"),
-            ui.div(ui.output_ui("toggle_labels_ui"), class_="mt-2"),
+            ui.div(
+                ui.output_ui("chart_type_ui"),
+                ui.output_ui("toggle_labels_ui"),
+                class_="d-flex flex-wrap gap-4 align-items-end mt-2"
+            ),
             class_="p-3 mb-3 bg-light rounded shadow-sm",
             style="border-left: 5px solid #2c3e50;"
         ),
@@ -104,6 +115,16 @@ def server(input, output, session):
             "selected_survey",
             translate("survey_label"),
             choices=SURVEY_CHOICES
+        )
+
+    @render.ui
+    def chart_type_ui():
+        return ui.input_radio_buttons(
+            "chart_type",
+            translate("chart_type_label"),
+            choices={"bar": translate("bar_label"), "line": translate("line_label")},
+            selected="bar",
+            inline=True
         )
 
     @render.ui
@@ -199,8 +220,14 @@ def server(input, output, session):
             "#c62828"  # Dark Red
         ]
 
-        # Plot as Stacked Bar-graph
-        plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", color=custom_colors)
+        chart_type = input.chart_type()
+        if chart_type == "bar":
+            # Plot as Stacked Bar-graph
+            plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", color=custom_colors)
+        else:
+            plot_df.plot(kind="line", marker="o", linewidth=2, ax=ax, color=custom_colors)
+            # Ensure index integers display cleanly as X axis ticks instead of floats
+            ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
         # Add labels and styling
         ax.set_ylabel(value_col_label + " (" + meta.value_unit + ")")
@@ -208,15 +235,22 @@ def server(input, output, session):
         ax.set_ylim(0, 100)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
 
-        # Move the legend outside the plot area so it doesn't cover the bars
+        # Move the legend outside the plot area
         ax.legend(title=choice_col_label, bbox_to_anchor=(1.05, 1), loc='upper left')
 
         show_labels = input.show_labels()
-        if show_labels is not False:
-            # Add percentage values inside each stacked section
-            for container in ax.containers:
-                labels = [f"{int(v.get_height())}%" if v.get_height() > 0 else "" for v in container]
-                ax.bar_label(container, labels=labels, label_type='center')
+        if show_labels:
+            if chart_type == "bar":
+                # Add percentage values inside each stacked section
+                for container in ax.containers:
+                    labels = [f"{int(v.get_height())}%" if v.get_height() > 0 else "" for v in container]
+                    ax.bar_label(container, labels=labels, label_type='center')
+            else:
+                # Add data labels slightly above line points (skipping NaN entries)
+                for col in plot_df.columns:
+                    for x, y in zip(plot_df.index, plot_df[col]):
+                        if pd.notna(y):
+                            ax.text(x, y + 1.5, f"{int(y)}%", ha='center', va='bottom', fontsize=8)
 
         # Ensure the external legend doesn't get cut off when rendered in Shiny
         fig.tight_layout()
