@@ -32,5 +32,14 @@ DATASETS: dict[str, Metadata] = {
         value_unit="%",
         time_col_index=0,
         survey_id="DZPE7JsUS4tTwW"
-    )
+    ),
+    "kNH0jjogKxb2yo": Metadata(
+        title="Förslag: Höja skatterna",
+        file_path=Path(__file__).parent / "data" / "kNH0jjogKxb2yo" / "data.csv",
+        choice_col_index=1,
+        value_col_index=2,
+        value_unit="%",
+        time_col_index=0,
+        survey_id="kNH0jjogKxb2yo"
+    ),
 }
