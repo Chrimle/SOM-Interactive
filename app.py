@@ -39,23 +39,28 @@ I18N = {
 ANSWER_MAP = {
     "Mycket bra förslag": {
         "sv": "Mycket bra förslag",
-        "en": "Very good proposal"
+        "en": "Very good proposal",
+        "color": "#2e7d32"  # Dark Green
     },
     "Ganska bra förslag": {
         "sv": "Ganska bra förslag",
-        "en": "Rather good proposal"
+        "en": "Rather good proposal",
+        "color": "#81c784"  # Light Green
     },
     "Varken bra eller dåligt förslag": {
         "sv": "Varken bra eller dåligt förslag",
-        "en": "Neither good nor bad proposal"
+        "en": "Neither good nor bad proposal",
+        "color": "#b0bec5"  # Gray
     },
     "Ganska dåligt förslag": {
         "sv": "Ganska dåligt förslag",
-        "en": "Rather bad proposal"
+        "en": "Rather bad proposal",
+        "color": "#ef9a9a"  # Light Red
     },
     "Mycket dåligt förslag": {
         "sv": "Mycket dåligt förslag",
-        "en": "Very bad proposal"
+        "en": "Very bad proposal",
+        "color": "#c62828"  # Dark Red
     }
 }
 
@@ -232,8 +237,8 @@ def server(input, output, session):
         # Get all unique choices present in the data
         unique_choices = df[choice_col_label].dropna().unique().tolist()
 
-        # Sort them matching your preferred order layout
-        correct_order = ["Mycket bra förslag", "Ganska bra förslag", "Varken bra eller dåligt förslag", "Ganska dåligt förslag", "Mycket dåligt förslag"]
+        # Generate order dynamically using dict keys
+        correct_order = list(ANSWER_MAP.keys())
         existing_choices = [cat for cat in correct_order if cat in unique_choices]
 
         # Fallback for unexpected choices
@@ -302,8 +307,8 @@ def server(input, output, session):
 
         fig, ax = plt.subplots(figsize=(8, 5))
 
-        # Configuring Color-coding answers dynamically...
-        correct_order = ["Mycket bra förslag", "Ganska bra förslag", "Varken bra eller dåligt förslag", "Ganska dåligt förslag", "Mycket dåligt förslag"]
+        # Dynamically retrieve sorting order from map keys
+        correct_order = list(ANSWER_MAP.keys())
         existing_order = [cat for cat in correct_order if cat in plot_df.columns]
 
         # Apply the user's active answer selections
@@ -314,15 +319,8 @@ def server(input, output, session):
         # Reorder/Filter the dataframe columns
         plot_df = plot_df[existing_order]
 
-        # Use a mapping dictionary so colors stay locked to specific answers
-        color_map = {
-            "Mycket bra förslag": "#2e7d32",  # Dark Green
-            "Ganska bra förslag": "#81c784",  # Light Green
-            "Varken bra eller dåligt förslag": "#b0bec5",  # Gray
-            "Ganska dåligt förslag": "#ef9a9a",  # Light Red
-            "Mycket dåligt förslag": "#c62828"  # Dark Red
-        }
-        custom_colors = [color_map.get(cat, "#757575") for cat in plot_df.columns]
+        # Extract matching color mappings dynamically
+        custom_colors = [ANSWER_MAP.get(cat, {}).get("color", "#757575") for cat in plot_df.columns]
 
         # Rename columns using the translation map before plotting
         plot_df = plot_df.rename(columns={col: translate_answer(col) for col in plot_df.columns})
