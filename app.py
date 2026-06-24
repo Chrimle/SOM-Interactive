@@ -36,8 +36,6 @@ I18N = {
     }
 }
 
-SURVEY_CHOICES = {key: meta.title for key, meta in DATASETS.items()}
-
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.input_radio_buttons(
@@ -129,14 +127,23 @@ def server(input, output, session):
     @render.ui
     def selected_survey_ui():
         df, meta = current_dataset()
-        return ui.h5(meta.title, class_="m-0")
+        return ui.h5(meta.titles.get(input.lang(), meta.titles.get("sv")), class_="m-0")
 
     @render.ui
     def survey_selector_container():
+        lang = input.lang()
+        choices = {key: meta.titles.get(lang, meta.titles.get("sv")) for key, meta in DATASETS.items()}
+
+        try:
+            current_selection = input.selected_survey()
+        except Exception:
+            current_selection = None
+
         return ui.input_select(
             "selected_survey",
             translate("survey_label"),
-            choices=SURVEY_CHOICES
+            choices=choices,
+            selected=current_selection
         )
 
     @render.ui

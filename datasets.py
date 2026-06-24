@@ -1,99 +1,66 @@
 # datasets.py
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
 @dataclass
 class Metadata:
-    title: str
-    file_path: Path
-    choice_col_index: int
-    value_col_index: int
-    value_unit: str
-    time_col_index: int
     survey_id: str
+    titles: dict[str, str]
+    file_path: Path = field(init=False)
+    choice_col_index: int = 1
+    value_col_index: int = 2
+    value_unit: str = "%"
+    time_col_index: int = 0
+
+    def __post_init__(self):
+        self.file_path = Path(__file__).parent / "data" / self.survey_id / "data.csv"
 
 
+_SURVEYS = {
+    "byd2RYvlxDRhTo": {
+        "sv": "Förslag: Sänka fyraprocentspärren till riksdagen",
+        "en": "Proposal: Lower the election threshold to the parliament"
+    },
+    "dNdVkecX9JRx12": {
+        "sv": "Förslag: Sänka rösträttsåldern till 16 år i alla val",
+        "en": "Proposal: Lower the voting age to 16 in all elections"
+    },
+    "DRGRvMStYgAX68": {
+        "sv": "Förslag: Minska inkomstskillnaderna i samhället",
+        "en": "Proposal: Reduce income differences in society"
+    },
+    "DtKn8nRSgTxsq8": {
+        "sv": "Förslag: Införa sextimmars arbetsdag",
+        "en": "Proposal: Introduce six-hour workday"
+    },
+    "DZPE7JsUS4tTwW": {
+        "sv": "Förslag: Höja koldioxidskatten på bensin",
+        "en": "Proposal: Increase the CO2 tax on petrol"
+    },
+    "iLRRtxKKzUFOSF": {
+        "sv": "Förslag: Satsa på ett samhälle med ökad jämställdhet mellan kvinnor och män",
+        "en": "Proposal: Strive towards a society with greater equality between women and men"
+    },
+    "kNH0jjogKxb2yo": {
+        "sv": "Förslag: Höja skatterna",
+        "en": "Proposal: Raise taxes"
+    },
+    "u2FlGAaCPdtXZ0": {
+        "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
+        "en": "Proposal: Strive towards an environmentally friendly society"
+    },
+    "xvNuEbwvtouNOI": {
+        "sv": "Förslag: Sänka skatterna",
+        "en": "Proposal: Lower taxes"
+    },
+}
+
+# Dynamically build the final DATASETS dictionary
 DATASETS: dict[str, Metadata] = {
-    "byd2RYvlxDRhTo": Metadata(
-        title="Förslag: Sänka fyraprocentspärren till riksdagen",
-        file_path=Path(__file__).parent / "data" / "byd2RYvlxDRhTo" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="byd2RYvlxDRhTo"
-    ),
-    "dNdVkecX9JRx12": Metadata(
-        title="Förslag: Sänka rösträttsåldern till 16 år i alla val",
-        file_path=Path(__file__).parent / "data" / "dNdVkecX9JRx12" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="dNdVkecX9JRx12"
-    ),
-    "DRGRvMStYgAX68": Metadata(
-        title="Förslag: Minska inkomstskillnaderna i samhället",
-        file_path=Path(__file__).parent / "data" / "DRGRvMStYgAX68" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="DRGRvMStYgAX68"
-    ),
-    "DtKn8nRSgTxsq8": Metadata(
-        title="Förslag: Införa sextimmars arbetsdag",
-        file_path=Path(__file__).parent / "data" / "DtKn8nRSgTxsq8" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="DtKn8nRSgTxsq8"
-    ),
-    "DZPE7JsUS4tTwW": Metadata(
-        title="Förslag: Höja koldioxidskatten på bensin",
-        file_path=Path(__file__).parent / "data" / "DZPE7JsUS4tTwW" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="DZPE7JsUS4tTwW"
-    ),
-    "iLRRtxKKzUFOSF": Metadata(
-        title="Förslag: Satsa på ett samhälle med ökad jämställdhet mellan kvinnor och män",
-        file_path=Path(__file__).parent / "data" / "iLRRtxKKzUFOSF" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="iLRRtxKKzUFOSF"
-    ),
-    "kNH0jjogKxb2yo": Metadata(
-        title="Förslag: Höja skatterna",
-        file_path=Path(__file__).parent / "data" / "kNH0jjogKxb2yo" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="kNH0jjogKxb2yo"
-    ),
-    "u2FlGAaCPdtXZ0": Metadata(
-        title="Förslag: Satsa mer på ett miljövänligt samhälle",
-        file_path=Path(__file__).parent / "data" / "u2FlGAaCPdtXZ0" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="u2FlGAaCPdtXZ0"
-    ),
-    "xvNuEbwvtouNOI": Metadata(
-        title="Förslag: Sänka skatterna",
-        file_path=Path(__file__).parent / "data" / "xvNuEbwvtouNOI" / "data.csv",
-        choice_col_index=1,
-        value_col_index=2,
-        value_unit="%",
-        time_col_index=0,
-        survey_id="xvNuEbwvtouNOI"
-    ),
+    survey_id: Metadata(
+        survey_id=survey_id,
+        titles=language_map
+    )
+    for survey_id, language_map in _SURVEYS.items()
 }
