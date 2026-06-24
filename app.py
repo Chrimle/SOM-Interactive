@@ -171,7 +171,8 @@ def server(input, output, session):
             "selected_survey",
             translate("survey_label"),
             choices=choices,
-            selected=current_selection
+            selected=current_selection,
+            width="max-content"
         )
 
     @render.ui
