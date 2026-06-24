@@ -354,14 +354,14 @@ def server(input, output, session):
             if chart_type == "bar":
                 # Add percentage values inside each stacked section
                 for container in ax.containers:
-                    labels = [f"{int(v.get_height())}%" if v.get_height() > 0 else "" for v in container]
+                    labels = [int(v.get_height()) if v.get_height() > 0 else "" for v in container]
                     ax.bar_label(container, labels=labels, label_type='center')
             else:
                 # Add data labels slightly above line points (skipping NaN entries)
                 for col in plot_df.columns:
                     for x, y in zip(plot_df.index, plot_df[col]):
                         if pd.notna(y):
-                            ax.text(x, y + 1.5, f"{int(y)}%", ha='center', va='bottom', fontsize=8)
+                            ax.text(x, y + 1.5, int(y), ha='center', va='bottom', fontsize=8)
 
         # Ensure the external legend doesn't get cut off when rendered in Shiny
         fig.tight_layout()
