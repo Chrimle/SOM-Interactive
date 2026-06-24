@@ -36,6 +36,29 @@ I18N = {
     }
 }
 
+ANSWER_MAP = {
+    "Mycket bra förslag": {
+        "sv": "Mycket bra förslag",
+        "en": "Very good proposal"
+    },
+    "Ganska bra förslag": {
+        "sv": "Ganska bra förslag",
+        "en": "Rather good proposal"
+    },
+    "Varken bra eller dåligt förslag": {
+        "sv": "Varken bra eller dåligt förslag",
+        "en": "Neither good nor bad proposal"
+    },
+    "Ganska dåligt förslag": {
+        "sv": "Ganska dåligt förslag",
+        "en": "Rather bad proposal"
+    },
+    "Mycket dåligt förslag": {
+        "sv": "Mycket dåligt förslag",
+        "en": "Very bad proposal"
+    }
+}
+
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.input_radio_buttons(
@@ -103,6 +126,9 @@ def server(input, output, session):
     # A helper function to quickly look up translations
     def translate(key: str) -> str:
         return I18N[input.lang()][key]
+
+    def translate_answer(ans: str) -> str:
+        return ANSWER_MAP.get(ans, {}).get(input.lang(), ans)
 
     @reactive.calc
     def current_dataset() -> tuple[pd.DataFrame, Metadata]:
@@ -217,7 +243,7 @@ def server(input, output, session):
         return ui.input_checkbox_group(
             "selected_answers",
             translate("filter_answers_label"),
-            choices={c: c for c in final_choices},
+            choices={c: translate_answer(c) for c in final_choices},
             selected=final_choices,
             inline=True
         )
@@ -297,6 +323,9 @@ def server(input, output, session):
             "Mycket dåligt förslag": "#c62828"  # Dark Red
         }
         custom_colors = [color_map.get(cat, "#757575") for cat in plot_df.columns]
+
+        # Rename columns using the translation map before plotting
+        plot_df = plot_df.rename(columns={col: translate_answer(col) for col in plot_df.columns})
 
         if chart_type == "bar":
             # Plot as Stacked Bar-graph
