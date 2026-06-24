@@ -16,7 +16,6 @@ I18N = {
         "chart_type_label": "Välj diagramtyp:",
         "bar_label": "Staplat stapeldiagram",
         "line_label": "Linjediagram",
-        "filter_answers_label": "Visa/dölj svar:",
         "toggle_insert_missing_years": "Lägg till saknade år",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
     },
@@ -30,7 +29,6 @@ I18N = {
         "chart_type_label": "Select chart type:",
         "bar_label": "Stacked bar chart",
         "line_label": "Line chart",
-        "filter_answers_label": "Show/hide answers:",
         "toggle_insert_missing_years": "Insert missing years",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
     }
@@ -109,7 +107,6 @@ app_ui = ui.page_sidebar(
             ui.output_ui("toggle_insert_missing_years_ui"),
             class_="d-flex flex-wrap gap-4 align-items-center mb-3"
         ),
-        ui.output_ui("answer_filter_container"),
         class_="p-3 mb-3 bg-light rounded shadow-sm",
         style="border-left: 5px solid #2c3e50;"
     ),
@@ -230,31 +227,6 @@ def server(input, output, session):
         )
 
     @render.ui
-    def answer_filter_container():
-        df, meta = current_dataset()
-        choice_col_label = df.columns[meta.choice_col_index]
-
-        # Get all unique choices present in the data
-        unique_choices = df[choice_col_label].dropna().unique().tolist()
-
-        # Generate order dynamically using dict keys
-        correct_order = list(ANSWER_MAP.keys())
-        existing_choices = [cat for cat in correct_order if cat in unique_choices]
-
-        # Fallback for unexpected choices
-        other_choices = [cat for cat in unique_choices if cat not in correct_order]
-        final_choices = existing_choices + other_choices
-
-        return ui.input_select(
-            "selected_answers",
-            translate("filter_answers_label"),
-            choices={c: translate_answer(c) for c in final_choices},
-            selected=final_choices,
-            multiple=True,
-            selectize=True
-        )
-
-    @render.ui
     def github_link():
         return ui.p(
             f"{translate('github_text')} - ",
@@ -310,11 +282,6 @@ def server(input, output, session):
         # Dynamically retrieve sorting order from map keys
         correct_order = list(ANSWER_MAP.keys())
         existing_order = [cat for cat in correct_order if cat in plot_df.columns]
-
-        # Apply the user's active answer selections
-        selected_answers = input.selected_answers()
-        if selected_answers:
-            existing_order = [cat for cat in existing_order if cat in selected_answers]
 
         # Reorder/Filter the dataframe columns
         plot_df = plot_df[existing_order]
