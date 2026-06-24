@@ -329,6 +329,12 @@ def server(input, output, session):
 
         # Build Plotly Traces
         for col, color in zip(plot_df.columns, custom_colors):
+            # Custom hover template ensuring full name alignment alongside its values
+            hovertemplate = (
+                f"<b>{col}</b><br>"
+                f"{value_col_label}: %{{y}} {meta.value_unit}<extra></extra>"
+            )
+
             if chart_type == "bar":
                 text_labels = [int(v) if pd.notna(v) and v > 0 else "" for v in plot_df[col]] if show_labels else None
                 fig.add_trace(go.Bar(
@@ -338,7 +344,8 @@ def server(input, output, session):
                     marker_color=color,
                     marker_line=dict(width=1, color="black"),
                     text=text_labels,
-                    textposition="inside" if show_labels else "none"
+                    textposition="inside" if show_labels else "none",
+                    hovertemplate=hovertemplate
                 ))
             else:
                 text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
@@ -350,7 +357,8 @@ def server(input, output, session):
                     line=dict(color=color, width=2),
                     marker=dict(size=8),
                     text=text_labels,
-                    textposition="top center"
+                    textposition="top center",
+                    hovertemplate=hovertemplate
                 ))
 
         # Layout and Styling
@@ -373,7 +381,12 @@ def server(input, output, session):
             ),
             template="plotly_white",
             hovermode="x unified",
-            margin=dict(r=150)  # Adds margin for the legend
+            hoverlabel=dict(
+                bgcolor="white",
+                font_size=12,
+                align="left"
+            ),
+            margin=dict(r=30)
         )
 
         # Force categorical x-axis for bars so reindexed missing years display as gaps,
