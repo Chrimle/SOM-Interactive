@@ -245,12 +245,13 @@ def server(input, output, session):
         other_choices = [cat for cat in unique_choices if cat not in correct_order]
         final_choices = existing_choices + other_choices
 
-        return ui.input_checkbox_group(
+        return ui.input_select(
             "selected_answers",
             translate("filter_answers_label"),
             choices={c: translate_answer(c) for c in final_choices},
             selected=final_choices,
-            inline=True
+            multiple=True,
+            selectize=True
         )
 
     @render.ui
