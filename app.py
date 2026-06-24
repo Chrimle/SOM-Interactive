@@ -1,8 +1,8 @@
 from pathlib import Path
 from shiny import App, render, ui, reactive
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+import plotly.graph_objects as go
+from shinywidgets import output_widget, render_plotly
 from datasets import DATASETS, Metadata
 
 I18N = {
@@ -117,7 +117,7 @@ app_ui = ui.page_sidebar(
         ui.card_header(
             ui.output_ui("selected_survey_ui")
         ),
-        ui.output_plot("survey_plot"),
+        output_widget("survey_plot"),
         ui.card_footer(
             ui.output_ui("survey_source_ui")
         ),
@@ -275,7 +275,7 @@ def server(input, output, session):
             class_="m-0 small text-muted"
         )
 
-    @render.plot
+    @render_plotly
     def survey_plot():
         df, meta = current_dataset()
         # Labels
@@ -284,6 +284,7 @@ def server(input, output, session):
         time_col_label = df.columns[meta.time_col_index]
 
         chart_type = input.chart_type()
+        show_labels = input.show_labels()
 
         # Filter the dataframe based on the slider input (if it exists)
         year_range = input.year_range()
@@ -306,8 +307,6 @@ def server(input, output, session):
             plot_df = plot_df.reindex(full_years)
         # ------------------------------------
 
-        fig, ax = plt.subplots(figsize=(8, 5))
-
         # Dynamically retrieve sorting order from map keys
         correct_order = list(ANSWER_MAP.keys())
         existing_order = [cat for cat in correct_order if cat in plot_df.columns]
@@ -326,45 +325,63 @@ def server(input, output, session):
         # Rename columns using the translation map before plotting
         plot_df = plot_df.rename(columns={col: translate_answer(col) for col in plot_df.columns})
 
-        if chart_type == "bar":
-            # Plot as Stacked Bar-graph
-            plot_df.plot(kind="bar", stacked=True, ax=ax, edgecolor="black", color=custom_colors)
-        else:
-            plot_df.plot(kind="line", marker="o", linewidth=2, ax=ax, color=custom_colors)
-            # Ensure index integers display cleanly as X axis ticks instead of floats
-            ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+        fig = go.Figure()
 
-        # Add labels and styling
-        ax.set_ylabel(value_col_label + " (" + meta.value_unit + ")")
-        ax.set_xlabel(time_col_label)
-
-        # Only lock y-limit to 100 if it's a stacked bar chart (as values total up to 100%)
-        if chart_type == "bar":
-            ax.set_ylim(0, 100)
-        else:
-            ax.set_ylim(0, None)
-
-        ax.grid(axis='y', linestyle='--', alpha=0.7)
-
-        # Move the legend outside the plot area
-        ax.legend(title=choice_col_label, bbox_to_anchor=(1.05, 1), loc='upper left')
-
-        show_labels = input.show_labels()
-        if show_labels:
+        # Build Plotly Traces
+        for col, color in zip(plot_df.columns, custom_colors):
             if chart_type == "bar":
-                # Add percentage values inside each stacked section
-                for container in ax.containers:
-                    labels = [int(v.get_height()) if v.get_height() > 0 else "" for v in container]
-                    ax.bar_label(container, labels=labels, label_type='center')
+                text_labels = [int(v) if pd.notna(v) and v > 0 else "" for v in plot_df[col]] if show_labels else None
+                fig.add_trace(go.Bar(
+                    x=plot_df.index,
+                    y=plot_df[col],
+                    name=col,
+                    marker_color=color,
+                    marker_line=dict(width=1, color="black"),
+                    text=text_labels,
+                    textposition="inside" if show_labels else "none"
+                ))
             else:
-                # Add data labels slightly above line points (skipping NaN entries)
-                for col in plot_df.columns:
-                    for x, y in zip(plot_df.index, plot_df[col]):
-                        if pd.notna(y):
-                            ax.text(x, y + 1.5, int(y), ha='center', va='bottom', fontsize=8)
+                text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
+                fig.add_trace(go.Scatter(
+                    x=plot_df.index,
+                    y=plot_df[col],
+                    mode='lines+markers+text' if show_labels else 'lines+markers',
+                    name=col,
+                    line=dict(color=color, width=2),
+                    marker=dict(size=8),
+                    text=text_labels,
+                    textposition="top center"
+                ))
 
-        # Ensure the external legend doesn't get cut off when rendered in Shiny
-        fig.tight_layout()
+        # Layout and Styling
+        fig.update_layout(
+            barmode='stack' if chart_type == "bar" else 'group',
+            yaxis_title=f"{value_col_label} ({meta.value_unit})",
+            xaxis_title=time_col_label,
+            yaxis=dict(
+                range=[0, 100] if chart_type == "bar" else [0, None],
+                gridcolor='rgba(0,0,0,0.1)',
+                griddash='dash'
+            ),
+            legend_title_text=choice_col_label,
+            legend=dict(
+                orientation="v",
+                yanchor="top",
+                y=1,
+                xanchor="left",
+                x=1.02
+            ),
+            template="plotly_white",
+            hovermode="x unified",
+            margin=dict(r=150)  # Adds margin for the legend
+        )
+
+        # Force categorical x-axis for bars so reindexed missing years display as gaps,
+        # or enforce integer ticks for line charts.
+        if chart_type == "bar":
+            fig.update_xaxes(type='category')
+        else:
+            fig.update_xaxes(dtick=1)
 
         return fig
 
