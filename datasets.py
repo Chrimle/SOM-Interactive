@@ -92,6 +92,10 @@ _SURVEYS = {
         "sv": "Förslag: Sänka skatterna",
         "en": "Proposal: Lower taxes"
     },
+    "ymzgS99s9eEA7P": {
+        "sv": "Förslag: Begränsa rätten till fri abort",
+        "en": "Proposal: Limit the right to abortion"
+    },
 }
 
 # Dynamically build the final DATASETS dictionary
