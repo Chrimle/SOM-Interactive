@@ -61,6 +61,11 @@ ANSWER_MAP = {
         "sv": "Mycket dåligt förslag",
         "en": "Very bad proposal",
         "color": "#c62828"  # Dark Red
+    },
+    "Ingen uppfattning": {
+        "sv": "Ingen uppfattning",
+        "en": "No opinion",
+        "color": "#37474f"  # Gray
     }
 }
 
