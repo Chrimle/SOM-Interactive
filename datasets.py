@@ -36,6 +36,10 @@ class Metadata:
 
 
 _SURVEYS = {
+    "5jkTvojUF0ZTIU": {
+        "sv": "Förslag: Införa dödstraff för mord",
+        "en": "Proposal: Introduce death penalty for murder"
+    },
     "ArOo97j4b6ZFpd": {
         "sv": "Förslag: Tillåta aktiv dödshjälp",
         "en": "Proposal: Allow active euthanasia"
