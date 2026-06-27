@@ -309,7 +309,7 @@ def server(input, output, session):
         # - Insert Missing Years & Re-index -
         plot_df.index = plot_df.index.astype(int)
         # Only re-index to add empty years if the toggle is checked
-        if input.insert_missing_years() and chart_type == "bar":
+        if input.insert_missing_years() or chart_type != "bar":
             if year_range is not None:
                 full_years = range(year_range[0], year_range[1] + 1)
             elif not plot_df.empty:
@@ -356,6 +356,19 @@ def server(input, output, session):
                 ))
             else:
                 text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
+
+                # TRACE 1: Background dashed line connecting the missing NaN gaps
+                fig.add_trace(go.Scatter(
+                    x=plot_df.index,
+                    y=plot_df[col],
+                    mode='lines',
+                    line=dict(color=color, width=2, dash='dash'),
+                    connectgaps=True,
+                    showlegend=False,
+                    hoverinfo='skip'
+                ))
+
+                # TRACE 2: Foreground solid line + markers that breaks at NaN gaps
                 fig.add_trace(go.Scatter(
                     x=plot_df.index,
                     y=plot_df[col],
@@ -365,7 +378,8 @@ def server(input, output, session):
                     marker=dict(size=8),
                     text=text_labels,
                     textposition="top center",
-                    hovertemplate=hovertemplate
+                    hovertemplate=hovertemplate,
+                    connectgaps=False
                 ))
 
         # Layout and Styling
