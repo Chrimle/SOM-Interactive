@@ -424,7 +424,7 @@ def server(input, output, session):
             yaxis_title=f"{value_col_label} {f"({value_unit_label})" if value_unit_label is not None else ""}",
             xaxis_title=time_col_label,
             yaxis=dict(
-                range=[0, 100] if chart_type == "bar" else [0, None],
+                range=[0, None],
                 gridcolor='rgba(0,0,0,0.1)',
                 griddash='dash'
             ),
