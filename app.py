@@ -23,6 +23,7 @@ I18N = {
         # SOM Provided translations
         "Antal svar": "Antal svar",
         "Procent": "Procent",
+        "År": "År",
     },
     "en": {
         "subtitle": "Interact with data from the SOM-institute! ❤️ This project is Work-in-Progress.",
@@ -40,7 +41,8 @@ I18N = {
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
-        "Procent": "Percent",  # TODO: find official translation!
+        "Procent": "Percent",
+        "År": "Year",
     }
 }
 
@@ -337,6 +339,7 @@ def server(input, output, session):
         value_unit_label = active_config.value_unit if active_config else None
 
         time_col_label = df.columns[meta.time_col_index]
+        time_axis_display_name = translate(time_col_label)
 
         chart_type = input.chart_type()
         show_labels = input.show_labels()
@@ -429,7 +432,7 @@ def server(input, output, session):
         fig.update_layout(
             barmode='stack' if chart_type == "bar" else 'group',
             yaxis_title=f"{value_display_name} {f"({value_unit_label})" if value_unit_label is not None else ""}",
-            xaxis_title=time_col_label,
+            xaxis_title=time_axis_display_name,
             yaxis=dict(
                 range=[0, None],
                 gridcolor='rgba(0,0,0,0.1)',
