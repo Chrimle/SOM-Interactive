@@ -1,11 +1,19 @@
 # datasets.py
 from enum import Enum
 from dataclasses import dataclass, field
+from typing import Optional
 from pathlib import Path
 
 
 class Category(Enum):
     PROPOSAL = {"sv": "Förslag", "en": "Proposal"}
+
+
+@dataclass
+class ValueColumnConfig:
+    column_index: int
+    display_name: str
+    value_unit: Optional[str] = None
 
 
 @dataclass
@@ -15,8 +23,12 @@ class Metadata:
     file_path: Path = field(init=False)
     category: Category = Category.PROPOSAL
     choice_col_index: int = 1
-    value_col_index: int = 2
-    value_unit: str = "%"
+    value_columns: list[ValueColumnConfig] = field(
+        default_factory=lambda: [
+            ValueColumnConfig(column_index=2, display_name="Procent", value_unit="%"),
+            ValueColumnConfig(column_index=3, display_name="Antal svar", value_unit=None)
+        ]
+    )
     time_col_index: int = 0
 
     def __post_init__(self):

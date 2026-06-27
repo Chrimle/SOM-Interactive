@@ -105,6 +105,7 @@ app_ui = ui.page_sidebar(
         ui.div(
             ui.output_ui("category_selector_container"),
             ui.output_ui("survey_selector_container"),
+            ui.output_ui("value_selector_container"),
             class_="d-flex flex-wrap gap-4 align-items-center"
         ),
         ui.hr(),
@@ -220,6 +221,29 @@ def server(input, output, session):
         )
 
     @render.ui
+    def value_selector_container():
+        df, meta = current_dataset()
+        # Fallback if no survey metadata is loaded yet
+        if not meta:
+            return None
+
+        choices = {}
+        for config in meta.value_columns:
+            idx = config.column_index
+            display_name = config.display_name
+            unit = config.value_unit
+
+            unit_label = f" ({unit})" if unit else ""
+            choices[str(idx)] = f"{display_name}{unit_label}"
+
+        return ui.input_select(
+            id="selected_value_col",
+            label="Select Value Column",
+            choices=choices,
+            selected=list(choices.keys())[0]
+        )
+
+    @render.ui
     def chart_type_ui():
         return ui.input_radio_buttons(
             "chart_type",
@@ -295,9 +319,14 @@ def server(input, output, session):
     @render_plotly
     def survey_plot():
         df, meta = current_dataset()
+        chosen_index = int(input.selected_value_col())
         # Labels
         choice_col_label = df.columns[meta.choice_col_index]
-        value_col_label = df.columns[meta.value_col_index]
+        value_col_label = df.columns[chosen_index]
+
+        active_config = next((c for c in meta.value_columns if c.column_index == chosen_index), None)
+        value_unit_label = active_config.value_unit if active_config else None
+
         time_col_label = df.columns[meta.time_col_index]
 
         chart_type = input.chart_type()
@@ -344,7 +373,7 @@ def server(input, output, session):
             # Custom hover template ensuring full name alignment alongside its values
             hovertemplate = (
                 f"<b>{col}</b><br>"
-                f"{value_col_label}: %{{y}} {meta.value_unit}<extra></extra>"
+                f"{value_col_label}: %{{y}} {value_unit_label if value_unit_label is not None else ""}<extra></extra>"
             )
 
             if chart_type == "bar":
@@ -390,7 +419,7 @@ def server(input, output, session):
         # Layout and Styling
         fig.update_layout(
             barmode='stack' if chart_type == "bar" else 'group',
-            yaxis_title=f"{value_col_label} ({meta.value_unit})",
+            yaxis_title=f"{value_col_label} {f"({value_unit_label})" if value_unit_label is not None else ""}",
             xaxis_title=time_col_label,
             yaxis=dict(
                 range=[0, 100] if chart_type == "bar" else [0, None],
