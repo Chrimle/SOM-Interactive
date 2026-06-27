@@ -60,6 +60,10 @@ _SURVEYS = {
         "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
         "en": "Proposal: Strive towards an environmentally friendly society"
     },
+    "vAkVIwSOFQLy8J": {
+        "sv": "Förslag: Stärka djurens rätt",
+        "en": "Proposal: Improve the rights of animals"
+    },
     "xvNuEbwvtouNOI": {
         "sv": "Förslag: Sänka skatterna",
         "en": "Proposal: Lower taxes"
