@@ -68,6 +68,10 @@ _SURVEYS = {
         "sv": "Förslag: Höja skatterna",
         "en": "Proposal: Raise taxes"
     },
+    "MfMvdbn5VClF9O": {
+        "sv": "Förslag: Sverige bör på lång sikt avveckla kärnkraften",
+        "en": "Proposal: Sweden should in the long run abolish nuclear power"
+    },
     "u2FlGAaCPdtXZ0": {
         "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
         "en": "Proposal: Strive towards an environmentally friendly society"
