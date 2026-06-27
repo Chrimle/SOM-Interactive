@@ -84,6 +84,10 @@ _SURVEYS = {
         "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
         "en": "Proposal: Strive towards an environmentally friendly society"
     },
+    "uZM8ISnRKSbtLH": {
+        "sv": "Förslag: Förbjuda forskning som använder befruktade ägg",
+        "en": "Proposal: Prohibit research that uses fertilized eggs (embryonic stem cells)"
+    },
     "vAkVIwSOFQLy8J": {
         "sv": "Förslag: Stärka djurens rätt",
         "en": "Proposal: Improve the rights of animals"
