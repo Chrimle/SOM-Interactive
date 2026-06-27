@@ -8,6 +8,7 @@ from datasets import DATASETS, Metadata
 I18N = {
     "sv": {
         "subtitle": "Interagera med data från SOM-institutet! ❤️ Detta är ett projekt under konstruktion.",
+        "category_label": "Välj kategori:",
         "survey_label": "Välj undersökning:",
         "source_label": "Källa till data:",
         "github_text": "Lämna feedback och förslag på projektet här",
@@ -21,6 +22,7 @@ I18N = {
     },
     "en": {
         "subtitle": "Interact with data from the SOM-institute! ❤️ This project is Work-in-Progress.",
+        "category_label": "Select category:",
         "survey_label": "Select survey:",
         "source_label": "Data source:",
         "github_text": "Leave feedback and suggestions on the project here",
@@ -95,7 +97,11 @@ app_ui = ui.page_sidebar(
         """)
     ),
     ui.div(
-        ui.output_ui("survey_selector_container"),
+        ui.div(
+            ui.output_ui("category_selector_container"),
+            ui.output_ui("survey_selector_container"),
+            class_="d-flex flex-wrap gap-4 align-items-center"
+        ),
         ui.hr(),
         ui.div(
             ui.div(
@@ -158,14 +164,47 @@ def server(input, output, session):
         return ui.h5(meta.titles.get(input.lang(), meta.titles.get("sv")), class_="m-0")
 
     @render.ui
-    def survey_selector_container():
+    def category_selector_container():
         lang = input.lang()
-        choices = {key: meta.titles.get(lang, meta.titles.get("sv")) for key, meta in DATASETS.items()}
+
+        unique_categories = {meta.category for meta in DATASETS.values()}
+
+        choices = {cat.name: cat.value.get(lang, cat.name) for cat in unique_categories}
 
         try:
-            current_selection = input.selected_survey()
+            current_selection = input.selected_category()
         except Exception:
             current_selection = None
+
+        return ui.input_select(
+            "selected_category",
+            translate("category_label"),
+            choices=choices,
+            selected=current_selection,
+            width="max-content"
+        )
+
+    @render.ui
+    def survey_selector_container():
+        lang = input.lang()
+        try:
+            selected_cat_name = input.selected_category()
+        except Exception:
+            selected_cat_name = None
+
+        # Filter the survey choices based on the selected category
+        choices = {}
+        for key, meta in DATASETS.items():
+            if selected_cat_name is None or meta.category.name == selected_cat_name:
+                choices[key] = meta.titles.get(lang, meta.titles.get("sv"))
+
+        # Prevent crashes if the user changes category and the old survey is no longer valid
+        try:
+            current_selection = input.selected_survey()
+            if current_selection not in choices and choices:
+                current_selection = list(choices.keys())[0]
+        except Exception:
+            current_selection = list(choices.keys())[0] if choices else None
 
         return ui.input_select(
             "selected_survey",
