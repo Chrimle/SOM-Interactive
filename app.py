@@ -20,6 +20,9 @@ I18N = {
         "line_label": "Linjediagram",
         "toggle_insert_missing_years": "Lägg till saknade år",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
+        # SOM Provided translations
+        "Antal svar": "Antal svar",
+        "Procent": "Procent",
     },
     "en": {
         "subtitle": "Interact with data from the SOM-institute! ❤️ This project is Work-in-Progress.",
@@ -35,6 +38,9 @@ I18N = {
         "line_label": "Line chart",
         "toggle_insert_missing_years": "Insert missing years",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
+        # SOM Provided translations
+        "Antal svar": "Response Count",  # TODO: find official translation!
+        "Procent": "Percent",  # TODO: find official translation!
     }
 }
 
@@ -232,7 +238,7 @@ def server(input, output, session):
         choices = {}
         for config in meta.value_columns:
             idx = config.column_index
-            display_name = config.display_name
+            display_name = translate(config.display_name)
             unit = config.value_unit
 
             unit_label = f" ({unit})" if unit else ""
@@ -325,6 +331,7 @@ def server(input, output, session):
         # Labels
         choice_col_label = df.columns[meta.choice_col_index]
         value_col_label = df.columns[chosen_index]
+        value_display_name = translate(df.columns[chosen_index])
 
         active_config = next((c for c in meta.value_columns if c.column_index == chosen_index), None)
         value_unit_label = active_config.value_unit if active_config else None
@@ -375,7 +382,7 @@ def server(input, output, session):
             # Custom hover template ensuring full name alignment alongside its values
             hovertemplate = (
                 f"<b>{col}</b><br>"
-                f"{value_col_label}: %{{y}} {value_unit_label if value_unit_label is not None else ""}<extra></extra>"
+                f"{value_display_name}: %{{y}} {value_unit_label if value_unit_label is not None else ""}<extra></extra>"
             )
 
             if chart_type == "bar":
@@ -421,7 +428,7 @@ def server(input, output, session):
         # Layout and Styling
         fig.update_layout(
             barmode='stack' if chart_type == "bar" else 'group',
-            yaxis_title=f"{value_col_label} {f"({value_unit_label})" if value_unit_label is not None else ""}",
+            yaxis_title=f"{value_display_name} {f"({value_unit_label})" if value_unit_label is not None else ""}",
             xaxis_title=time_col_label,
             yaxis=dict(
                 range=[0, None],
