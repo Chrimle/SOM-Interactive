@@ -1,6 +1,11 @@
 # datasets.py
+from enum import Enum
 from dataclasses import dataclass, field
 from pathlib import Path
+
+
+class Category(Enum):
+    PROPOSAL = {"sv": "Förslag", "en": "Proposal"}
 
 
 @dataclass
@@ -8,6 +13,7 @@ class Metadata:
     survey_id: str
     titles: dict[str, str]
     file_path: Path = field(init=False)
+    category: Category = Category.PROPOSAL
     choice_col_index: int = 1
     value_col_index: int = 2
     value_unit: str = "%"
