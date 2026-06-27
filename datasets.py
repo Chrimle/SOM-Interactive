@@ -36,6 +36,10 @@ class Metadata:
 
 
 _SURVEYS = {
+    "ArOo97j4b6ZFpd": {
+        "sv": "Förslag: Tillåta aktiv dödshjälp",
+        "en": "Proposal: Allow active euthanasia"
+    },
     "byd2RYvlxDRhTo": {
         "sv": "Förslag: Sänka fyraprocentspärren till riksdagen",
         "en": "Proposal: Lower the election threshold to the parliament"
