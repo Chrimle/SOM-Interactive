@@ -44,6 +44,10 @@ _SURVEYS = {
         "sv": "Förslag: Höja koldioxidskatten på bensin",
         "en": "Proposal: Increase the CO2 tax on petrol"
     },
+    "H21XmkoynT7gjK": {
+        "sv": "Förslag: Satsa på miljövänligt samhälle även om det innebär låg tillväxt",
+        "en": "Proposal: Strive towards an env. friendly society, even without economic growth"
+    },
     "iLRRtxKKzUFOSF": {
         "sv": "Förslag: Satsa på ett samhälle med ökad jämställdhet mellan kvinnor och män",
         "en": "Proposal: Strive towards a society with greater equality between women and men"
