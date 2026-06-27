@@ -10,6 +10,7 @@ I18N = {
         "subtitle": "Interagera med data från SOM-institutet! ❤️ Detta är ett projekt under konstruktion.",
         "category_label": "Välj kategori:",
         "survey_label": "Välj undersökning:",
+        "data_label": "Välj data:",
         "source_label": "Källa till data:",
         "github_text": "Lämna feedback och förslag på projektet här",
         "year_label": "Välj tidsperiod:",
@@ -24,6 +25,7 @@ I18N = {
         "subtitle": "Interact with data from the SOM-institute! ❤️ This project is Work-in-Progress.",
         "category_label": "Select category:",
         "survey_label": "Select survey:",
+        "data_label": "Select data:",
         "source_label": "Data source:",
         "github_text": "Leave feedback and suggestions on the project here",
         "year_label": "Select time period:",
@@ -238,7 +240,7 @@ def server(input, output, session):
 
         return ui.input_select(
             id="selected_value_col",
-            label="Select Value Column",
+            label=translate("data_label"),
             choices=choices,
             selected=list(choices.keys())[0]
         )
