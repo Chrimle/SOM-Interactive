@@ -145,7 +145,7 @@ app_ui = ui.page_sidebar(
             ui.card_header(
                 ui.output_ui("quick_stats_header")
             ),
-            ui.p("Work in Progress"),
+            ui.output_ui("quick_stats_body"),
             ui.card_footer(
                 ui.output_ui("quick_stats_footer")
             ),
@@ -528,6 +528,16 @@ def server(input, output, session):
     def quick_stats_header():
         return ui.h5(
             translate('quick_stats_header_label'),
+            class_="m-0"
+        )
+
+    @render.ui
+    def quick_stats_body():
+        if not is_valid_survey_selected():
+            return None
+        df, meta = current_dataset()
+        return ui.p(
+            "Work in Progress",
             class_="m-0"
         )
 
