@@ -20,6 +20,8 @@ I18N = {
         "bar_label": "Staplat stapeldiagram",
         "line_label": "Linjediagram",
         "scatter_label": "Punktdiagram med trendlinje",
+        "survey_title": "Ingen undersökning vald",
+        "default_survey_option": "--- Välj en undersökning ---",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
         # SOM Provided translations
         "Antal svar": "Antal svar",
@@ -39,6 +41,8 @@ I18N = {
         "bar_label": "Stacked bar chart",
         "line_label": "Line chart",
         "scatter_label": "Scatter plot with trend-line",
+        "survey_title": "No survey selected",
+        "default_survey_option": "--- Select a survey ---",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
@@ -154,8 +158,13 @@ def server(input, output, session):
     def translate_answer(ans: str) -> str:
         return ANSWER_MAP.get(ans, {}).get(input.lang(), ans)
 
+    def is_valid_survey_selected() -> bool:
+        return input.selected_survey() != ""
+
     @reactive.calc
     def current_dataset() -> tuple[pd.DataFrame, Metadata]:
+        if not is_valid_survey_selected():
+            return None, None
         meta = DATASETS[input.selected_survey()]
         df = pd.read_csv(meta.file_path, encoding="utf-8")
         return df, meta
@@ -177,7 +186,8 @@ def server(input, output, session):
     @render.ui
     def selected_survey_ui():
         df, meta = current_dataset()
-        return ui.h5(meta.titles.get(input.lang(), meta.titles.get("sv")), class_="m-0")
+        text = translate("survey_title") if meta is None else meta.titles.get(input.lang(), meta.titles.get("sv"))
+        return ui.h5(text, class_="m-0")
 
     @render.ui
     def category_selector_container():
@@ -209,18 +219,17 @@ def server(input, output, session):
             selected_cat_name = None
 
         # Filter the survey choices based on the selected category
-        choices = {}
+        choices = {"": translate("default_survey_option")}
         for key, meta in DATASETS.items():
             if selected_cat_name is None or meta.category.name == selected_cat_name:
                 choices[key] = meta.titles.get(lang, meta.titles.get("sv"))
 
-        # Prevent crashes if the user changes category and the old survey is no longer valid
         try:
             current_selection = input.selected_survey()
-            if current_selection not in choices and choices:
-                current_selection = list(choices.keys())[0]
+            if current_selection not in choices:
+                current_selection = ""
         except Exception:
-            current_selection = list(choices.keys())[0] if choices else None
+            current_selection = ""
 
         return ui.input_select(
             "selected_survey",
@@ -234,7 +243,7 @@ def server(input, output, session):
     def value_selector_container():
         df, meta = current_dataset()
         # Fallback if no survey metadata is loaded yet
-        if not meta:
+        if not meta or not is_valid_survey_selected():
             return None
 
         choices = {}
@@ -276,6 +285,9 @@ def server(input, output, session):
 
     @render.ui
     def year_slider_container():
+        if not is_valid_survey_selected():
+            return None
+
         df, meta = current_dataset()
         time_col_label = df.columns[meta.time_col_index]
 
@@ -307,6 +319,8 @@ def server(input, output, session):
 
     @render.ui
     def survey_source_ui():
+        if not is_valid_survey_selected():
+            return None
         df, meta = current_dataset()
         return ui.p(
             f"{translate('source_label')} ",
@@ -320,6 +334,8 @@ def server(input, output, session):
 
     @render_plotly
     def survey_plot():
+        if not is_valid_survey_selected():
+            return None
         df, meta = current_dataset()
         chosen_index = int(input.selected_value_col())
         # Labels
