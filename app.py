@@ -1,3 +1,4 @@
+import numpy as np
 from pathlib import Path
 from shiny import App, render, ui, reactive
 import pandas as pd
@@ -18,6 +19,7 @@ I18N = {
         "chart_type_label": "Välj diagramtyp:",
         "bar_label": "Staplat stapeldiagram",
         "line_label": "Linjediagram",
+        "scatter_label": "Punktdiagram med trendlinje",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
         # SOM Provided translations
         "Antal svar": "Antal svar",
@@ -36,6 +38,7 @@ I18N = {
         "chart_type_label": "Select chart type:",
         "bar_label": "Stacked bar chart",
         "line_label": "Line chart",
+        "scatter_label": "Scatter plot with trend-line",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
@@ -255,7 +258,11 @@ def server(input, output, session):
         return ui.input_radio_buttons(
             "chart_type",
             translate("chart_type_label"),
-            choices={"bar": translate("bar_label"), "line": translate("line_label")},
+            choices={
+                "bar": translate("bar_label"),
+                "line": translate("line_label"),
+                "scatter": translate("scatter_label")
+            },
             selected="bar"
         )
 
@@ -383,7 +390,7 @@ def server(input, output, session):
                     textposition="inside" if show_labels else "none",
                     hovertemplate=hovertemplate
                 ))
-            else:
+            elif chart_type == "line":
                 text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
 
                 # TRACE 1: Background dashed line connecting the missing NaN gaps
@@ -410,6 +417,41 @@ def server(input, output, session):
                     hovertemplate=hovertemplate,
                     connectgaps=False
                 ))
+            elif chart_type == "scatter":
+                text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
+
+                # Base Scatter Markers
+                fig.add_trace(go.Scatter(
+                    x=plot_df.index,
+                    y=plot_df[col],
+                    mode='markers+text' if show_labels else 'markers',
+                    name=col,
+                    marker=dict(color=color, size=8),
+                    text=text_labels,
+                    textposition="top center",
+                    hovertemplate=hovertemplate
+                ))
+
+                valid_data = plot_df[col].dropna()
+                if len(valid_data) > 1:  # Need at least 2 points to draw a line
+                    valid_idx = valid_data.index
+                    valid_vals = valid_data.values
+
+                    # 1D polynomial fit (linear regression)
+                    z = np.polyfit(valid_idx, valid_vals, 1)
+                    p = np.poly1d(z)
+                    trendline_y = p(plot_df.index)
+
+                    # Add Trendline Trace
+                    fig.add_trace(go.Scatter(
+                        x=plot_df.index,
+                        y=trendline_y,
+                        mode='lines',
+                        name=f"{col} (Trend)",
+                        line=dict(color=color, width=2, dash='dot'),
+                        showlegend=False,
+                        hoverinfo='skip'
+                    ))
 
         # Layout and Styling
         fig.update_layout(
