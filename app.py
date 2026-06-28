@@ -136,15 +136,29 @@ app_ui = ui.page_sidebar(
         class_="p-3 mb-3 bg-light rounded shadow-sm",
         style="border-left: 5px solid #2c3e50;"
     ),
-    ui.card(
-        ui.card_header(
-            ui.output_ui("selected_survey_ui")
+    ui.layout_columns(
+        ui.card(
+            ui.card_header(
+                ui.h5("Quick Stats", class_="m-0")
+            ),
+            ui.p("Work in Progress"),
+            ui.card_footer(
+                ui.p("Quick Stats", class_="m-0 small text-muted")
+            ),
+            full_screen=False
         ),
-        output_widget("survey_plot"),
-        ui.card_footer(
-            ui.output_ui("survey_source_ui")
+        ui.card(
+            ui.card_header(
+                ui.output_ui("selected_survey_ui")
+            ),
+            output_widget("survey_plot"),
+            ui.card_footer(
+                ui.output_ui("survey_source_ui")
+            ),
+            full_screen=True
         ),
-        full_screen=True
+        # 2/12 columns for Quick Stats (~17%), 10/12 for Chart (~83%)
+        col_widths={"md": (12, 12), "lg": (2, 10)}
     ),
     title="SOM Interactive"
 )
