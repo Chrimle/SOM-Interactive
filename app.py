@@ -23,6 +23,7 @@ I18N = {
         "survey_title": "Ingen undersökning vald",
         "default_survey_option": "--- Välj en undersökning ---",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
+        "quick_stats_footer_label": "Inofficiell data, analys av",
         # SOM Provided translations
         "Antal svar": "Antal svar",
         "Procent": "Procent",
@@ -44,6 +45,7 @@ I18N = {
         "survey_title": "No survey selected",
         "default_survey_option": "--- Select a survey ---",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
+        "quick_stats_footer_label": "Inofficial data, analysis by",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
         "Procent": "Percent",
@@ -143,7 +145,7 @@ app_ui = ui.page_sidebar(
             ),
             ui.p("Work in Progress"),
             ui.card_footer(
-                ui.p("Quick Stats", class_="m-0 small text-muted")
+                ui.output_ui("quick_stats_footer")
             ),
             full_screen=False
         ),
@@ -519,6 +521,18 @@ def server(input, output, session):
             fig.update_xaxes(dtick=1)
 
         return fig
+
+    @render.ui
+    def quick_stats_footer():
+        return ui.p(
+            f"{translate('quick_stats_footer_label')} ",
+            ui.a(
+                "Chrimle",
+                href="https://github.com/Chrimle",
+                target="_blank"
+            ),
+            class_="m-0 small text-muted"
+        )
 
 
 app = App(app_ui, server)
