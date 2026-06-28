@@ -23,6 +23,7 @@ I18N = {
         "survey_title": "Ingen undersökning vald",
         "default_survey_option": "--- Välj en undersökning ---",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
+        "quick_stats_header_label": "Snabb Fakta",
         "quick_stats_footer_label": "Inofficiell data, analys av",
         # SOM Provided translations
         "Antal svar": "Antal svar",
@@ -45,6 +46,7 @@ I18N = {
         "survey_title": "No survey selected",
         "default_survey_option": "--- Select a survey ---",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
+        "quick_stats_header_label": "Quick Stats",
         "quick_stats_footer_label": "Inofficial data, analysis by",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
@@ -141,7 +143,7 @@ app_ui = ui.page_sidebar(
     ui.layout_columns(
         ui.card(
             ui.card_header(
-                ui.h5("Quick Stats", class_="m-0")
+                ui.output_ui("quick_stats_header")
             ),
             ui.p("Work in Progress"),
             ui.card_footer(
@@ -521,6 +523,13 @@ def server(input, output, session):
             fig.update_xaxes(dtick=1)
 
         return fig
+
+    @render.ui
+    def quick_stats_header():
+        return ui.h5(
+            translate('quick_stats_header_label'),
+            class_="m-0"
+        )
 
     @render.ui
     def quick_stats_footer():
