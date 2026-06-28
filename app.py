@@ -18,7 +18,6 @@ I18N = {
         "chart_type_label": "Välj diagramtyp:",
         "bar_label": "Staplat stapeldiagram",
         "line_label": "Linjediagram",
-        "toggle_insert_missing_years": "Lägg till saknade år",
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
         # SOM Provided translations
         "Antal svar": "Antal svar",
@@ -37,7 +36,6 @@ I18N = {
         "chart_type_label": "Select chart type:",
         "bar_label": "Stacked bar chart",
         "line_label": "Line chart",
-        "toggle_insert_missing_years": "Insert missing years",
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
@@ -126,7 +124,6 @@ app_ui = ui.page_sidebar(
             ),
             ui.output_ui("chart_type_ui"),
             ui.output_ui("toggle_labels_ui"),
-            ui.output_ui("toggle_insert_missing_years_ui"),
             class_="d-flex flex-wrap gap-4 align-items-center mb-3"
         ),
         class_="p-3 mb-3 bg-light rounded shadow-sm",
@@ -271,18 +268,6 @@ def server(input, output, session):
         )
 
     @render.ui
-    def toggle_insert_missing_years_ui():
-        chart_type = input.chart_type()
-        if chart_type == "bar":
-            return ui.input_switch(
-                "insert_missing_years",
-                translate("toggle_insert_missing_years"),
-                value=True
-            )
-        else:
-            return None
-
-    @render.ui
     def year_slider_container():
         df, meta = current_dataset()
         time_col_label = df.columns[meta.time_col_index]
@@ -354,15 +339,13 @@ def server(input, output, session):
 
         # - Insert Missing Years & Re-index -
         plot_df.index = plot_df.index.astype(int)
-        # Only re-index to add empty years if the toggle is checked
-        if input.insert_missing_years() or chart_type != "bar":
-            if year_range is not None:
-                full_years = range(year_range[0], year_range[1] + 1)
-            elif not plot_df.empty:
-                full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
-            else:
-                full_years = []
-            plot_df = plot_df.reindex(full_years)
+        if year_range is not None:
+            full_years = range(year_range[0], year_range[1] + 1)
+        elif not plot_df.empty:
+            full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
+        else:
+            full_years = []
+        plot_df = plot_df.reindex(full_years)
         # ------------------------------------
 
         # Dynamically retrieve sorting order from map keys
