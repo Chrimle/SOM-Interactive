@@ -25,6 +25,8 @@ I18N = {
         "disclaimer": "Detta projekt är fristående och har ingen koppling till eller godkännande från SOM-institutet.",
         "quick_stats_header_label": "Snabb Fakta",
         "quick_stats_footer_label": "Inofficiell data, analys av",
+        "quick_stats_content_label_part1": "Jämför data från ",
+        "quick_stats_content_label_part2": " till ",
         # SOM Provided translations
         "Antal svar": "Antal svar",
         "Procent": "Procent",
@@ -48,6 +50,8 @@ I18N = {
         "disclaimer": "This project is an independent project and is not affiliated, associated nor endorsed by the SOM-institute.",
         "quick_stats_header_label": "Quick Stats",
         "quick_stats_footer_label": "Inofficial data, analysis by",
+        "quick_stats_content_label_part1": "Comparing data from ",
+        "quick_stats_content_label_part2": " to ",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
         "Procent": "Percent",
@@ -535,10 +539,104 @@ def server(input, output, session):
     def quick_stats_body():
         if not is_valid_survey_selected():
             return None
+
         df, meta = current_dataset()
-        return ui.p(
-            "Work in Progress",
-            class_="m-0"
+        chosen_index = int(input.selected_value_col())
+
+        # Labels
+        choice_col_label = df.columns[meta.choice_col_index]
+        value_col_label = df.columns[chosen_index]
+        time_col_label = df.columns[meta.time_col_index]
+
+        # Filter dataframe
+        year_range = input.year_range()
+        if year_range is not None:
+            df = df[(df[time_col_label] >= year_range[0]) & (df[time_col_label] <= year_range[1])]
+
+        if df.empty:
+            return ui.p("No data available for the selected range.", class_="text-muted m-0")
+
+        min_year = int(df[time_col_label].min())
+        max_year = int(df[time_col_label].max())
+
+        if min_year == max_year:
+            return ui.p(
+                f"Only one year of data ({min_year}) is available in this range. Select a wider range to see trends.",
+                class_="text-muted m-0"
+            )
+
+        # Get correct ordering based on your ANSWER_MAP
+        correct_order = list(ANSWER_MAP.keys())
+        existing_categories = [cat for cat in correct_order if cat in df[choice_col_label].values]
+
+        ui_elements = []
+
+        # Build a UI card for each category
+        for cat in existing_categories:
+            cat_data = df[df[choice_col_label] == cat]
+
+            # Isolate oldest and newest data points
+            old_data = cat_data[cat_data[time_col_label] == min_year]
+            new_data = cat_data[cat_data[time_col_label] == max_year]
+
+            # Skip if this specific category doesn't have data at both boundaries
+            if old_data.empty or new_data.empty:
+                continue
+
+            # Extract values directly without aggregation
+            old_val = old_data[value_col_label].values[0]
+            new_val = new_data[value_col_label].values[0]
+
+            # Calculate Trends
+            diff = new_val - old_val
+            if diff > 0:
+                trend_icon, text_color = "↗️", "text-success"
+                diff_str = f"+{diff:.1f}"
+            elif diff < 0:
+                trend_icon, text_color = "↘️", "text-danger"
+                diff_str = f"{diff:.1f}"
+            else:
+                trend_icon, text_color = "➡️", "text-muted"
+                diff_str = "0.0"
+
+            display_name = translate_answer(cat)
+
+            # Construct the Bootstrap Card
+            card = ui.div(
+                ui.div(display_name, class_="fw-bold mb-1 text-truncate"),
+                ui.div(
+                    # Row 1: Trend
+                    ui.div(
+                        ui.span("Trend: ", class_="fw-semibold text-muted"),
+                        ui.span(f"{trend_icon} {diff_str}", class_=f"fw-bold {text_color}"),
+                        class_="d-flex justify-content-between mb-1"
+                    ),
+                    # Row 2: First Value
+                    ui.div(
+                        ui.span(f"{min_year}: ", class_="fw-semibold text-muted"),
+                        ui.span(f"{old_val:.1f}", class_="fw-medium"),
+                        class_="d-flex justify-content-between mb-1"
+                    ),
+                    # Row 3: Second Value
+                    ui.div(
+                        ui.span(f"{max_year}: ", class_="fw-semibold text-muted"),
+                        ui.span(f"{new_val:.1f}", class_="fw-medium"),
+                        class_="d-flex justify-content-between"
+                    ),
+                    style="font-size: 0.85em;",
+                    class_="lh-sm"
+                ),
+                class_="card px-3 py-2 shadow-sm border-0 bg-light"
+            )
+            ui_elements.append(card)
+
+        if not ui_elements:
+            return ui.p("Not enough overlapping data points to compare the oldest and newest years for these series.", class_="text-muted m-0")
+
+        # Return the finalized Layout
+        return ui.div(
+            ui.p(translate("quick_stats_content_label_part1"), ui.strong(str(min_year)), translate("quick_stats_content_label_part2"), ui.strong(str(max_year)), ":", class_="mb-2 text-secondary", style="font-size: 0.9em;"),
+            ui.div(*ui_elements, class_="d-flex flex-column gap-2")
         )
 
     @render.ui
