@@ -96,6 +96,10 @@ _SURVEYS = {
         "sv": "Förslag: Förbjuda ansiktstäckande slöja på allmän plats",
         "en": "Proposal: Ban face-covering veils in public places"
     },
+    "NpTHvaNvTjmrB9": {
+        "sv": "Förslag: Alltid överlåta beslut i viktiga frågor till experter",
+        "en": "Proposal: Delegate decisions in important issues to experts"
+    },
     "u2FlGAaCPdtXZ0": {
         "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
         "en": "Proposal: Strive towards an environmentally friendly society"
