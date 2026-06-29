@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from shinywidgets import output_widget, render_plotly
 from datasets import DATASETS, Metadata
+from scipy.stats import linregress
 
 I18N = {
     "sv": {
@@ -28,6 +29,7 @@ I18N = {
         "quick_stats_content_label_part1": "Jämför data från ",
         "quick_stats_content_label_part2": " till ",
         "quick_stats_content_value_diff": "Skillnad",
+        "year_abbreviated": "år",
         # SOM Provided translations
         "Antal svar": "Antal svar",
         "Procent": "Procent",
@@ -54,6 +56,7 @@ I18N = {
         "quick_stats_content_label_part1": "Comparing data from ",
         "quick_stats_content_label_part2": " to ",
         "quick_stats_content_value_diff": "Difference",
+        "year_abbreviated": "yr",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
         "Procent": "Percent",
@@ -575,31 +578,38 @@ def server(input, output, session):
 
         # Build a UI card for each category
         for cat in existing_categories:
-            cat_data = df[df[choice_col_label] == cat]
+            cat_data = df[df[choice_col_label] == cat].dropna(subset=[time_col_label, value_col_label])
 
-            # Isolate oldest and newest data points
-            old_data = cat_data[cat_data[time_col_label] == min_year]
-            new_data = cat_data[cat_data[time_col_label] == max_year]
+            # Convert to numpy arrays for calculation
+            x = cat_data[time_col_label].astype(float).values
+            y = cat_data[value_col_label].astype(float).values
 
-            # Skip if this specific category doesn't have data at both boundaries
-            if old_data.empty or new_data.empty:
+            # We need at least 2 distinct data points to calculate a linear regression
+            if len(x) < 2 or len(np.unique(x)) < 2:
                 continue
 
-            # Extract values directly without aggregation
-            old_val = old_data[value_col_label].values[0]
-            new_val = new_data[value_col_label].values[0]
-
-            # Calculate Trends
+            # 1. Calculate Absolute Difference (Start to End point)
+            old_val = y[x == x.min()][0]
+            new_val = y[x == x.max()][0]
             diff = new_val - old_val
-            if diff > 0:
+            diff_str = f"+{diff:.1f}" if diff > 0 else f"{diff:.1f}"
+
+            # 2. Calculate Linear Regression (Slope and R²)
+            res = linregress(x, y)
+            slope = res.slope
+            r_squared = res.rvalue ** 2
+
+            # Format Trend (Slope / yr)
+            yr_abbr = translate("year_abbreviated")
+            if slope > 0:
                 text_color = "text-success"
-                diff_str = f"+ {diff:.1f}"
-            elif diff < 0:
+                trend_str = f"+{slope:.2f}/{yr_abbr}"
+            elif slope < 0:
                 text_color = "text-danger"
-                diff_str = f"- {-diff:.1f}"
+                trend_str = f"{slope:.2f}/{yr_abbr}"
             else:
                 text_color = "text-muted"
-                diff_str = "± 0.0"
+                trend_str = f"±0.00/{yr_abbr}"
 
             display_name = translate_answer(cat)
 
@@ -607,24 +617,24 @@ def server(input, output, session):
             card = ui.div(
                 ui.div(display_name, class_="fw-bold mb-1 text-truncate"),
                 ui.div(
-                    # Row 1: Trend
+                    # Row 1: Difference
                     ui.div(
                         ui.span(translate("quick_stats_content_value_diff"), class_="fw-semibold text-muted"),
-                        ui.span(diff_str, class_=f"fw-bold {text_color}"),
+                        ui.span(diff_str, class_="fw-bold text-muted"),
                         class_="d-flex justify-content-between mb-1"
                     ),
-                    # Row 2: First Value
-                    # ui.div(
-                    #    ui.span("Trend", class_="fw-semibold text-muted"),
-                    #    ui.span(f"{old_val:.1f}", class_="fw-medium"),
-                    #    class_="d-flex justify-content-between mb-1"
-                    # ),
-                    # Row 3: Second Value
-                    # ui.div(
-                    #    ui.span("R²", class_="fw-semibold text-muted"),
-                    #    ui.span(f"{new_val:.1f}", class_="fw-medium"),
-                    #    class_="d-flex justify-content-between"
-                    # ),
+                    # Row 2: Trend (Linear Regression Slope)
+                    ui.div(
+                        ui.span("Trend", class_="fw-semibold text-muted"),
+                        ui.span(trend_str, class_=f"fw-bold {text_color}"),
+                        class_="d-flex justify-content-between mb-1"
+                    ),
+                    # Row 3: R-squared
+                    ui.div(
+                        ui.span("R²", class_="fw-semibold text-muted"),
+                        ui.span(f"{r_squared:.3f}", class_="fw-medium"),
+                        class_="d-flex justify-content-between"
+                    ),
                     style="font-size: 0.85em;",
                     class_="lh-sm"
                 ),
