@@ -36,6 +36,10 @@ class Metadata:
 
 
 _SURVEYS = {
+    "0fWnBCJmdy3oGR": {
+        "sv": "Förslag: Tillåta försäljning av starköl, vin och sprit i livsmedelsbutiker",
+        "en": "Proposal: Allow the sale of beer, wine and liquor in grocery stores"
+    },
     "3P7V2u9m6Au4Dm": {
         "sv": "Förslag: Minska försvarsutgifterna",
         "en": "Proposal: Reduce defence spending"
