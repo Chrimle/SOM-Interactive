@@ -27,6 +27,7 @@ I18N = {
         "quick_stats_footer_label": "Inofficiell data, analys av",
         "quick_stats_content_label_part1": "Jämför data från ",
         "quick_stats_content_label_part2": " till ",
+        "quick_stats_content_value_diff": "Skillnad",
         # SOM Provided translations
         "Antal svar": "Antal svar",
         "Procent": "Procent",
@@ -52,6 +53,7 @@ I18N = {
         "quick_stats_footer_label": "Inofficial data, analysis by",
         "quick_stats_content_label_part1": "Comparing data from ",
         "quick_stats_content_label_part2": " to ",
+        "quick_stats_content_value_diff": "Difference",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
         "Procent": "Percent",
@@ -590,14 +592,14 @@ def server(input, output, session):
             # Calculate Trends
             diff = new_val - old_val
             if diff > 0:
-                trend_icon, text_color = "↗️", "text-success"
-                diff_str = f"+{diff:.1f}"
+                text_color = "text-success"
+                diff_str = f"+ {diff:.1f}"
             elif diff < 0:
-                trend_icon, text_color = "↘️", "text-danger"
-                diff_str = f"{diff:.1f}"
+                text_color = "text-danger"
+                diff_str = f"- {-diff:.1f}"
             else:
-                trend_icon, text_color = "➡️", "text-muted"
-                diff_str = "0.0"
+                text_color = "text-muted"
+                diff_str = "± 0.0"
 
             display_name = translate_answer(cat)
 
@@ -607,22 +609,22 @@ def server(input, output, session):
                 ui.div(
                     # Row 1: Trend
                     ui.div(
-                        ui.span("Trend: ", class_="fw-semibold text-muted"),
-                        ui.span(f"{trend_icon} {diff_str}", class_=f"fw-bold {text_color}"),
+                        ui.span(translate("quick_stats_content_value_diff"), class_="fw-semibold text-muted"),
+                        ui.span(diff_str, class_=f"fw-bold {text_color}"),
                         class_="d-flex justify-content-between mb-1"
                     ),
                     # Row 2: First Value
-                    ui.div(
-                        ui.span(f"{min_year}: ", class_="fw-semibold text-muted"),
-                        ui.span(f"{old_val:.1f}", class_="fw-medium"),
-                        class_="d-flex justify-content-between mb-1"
-                    ),
+                    # ui.div(
+                    #    ui.span("Trend", class_="fw-semibold text-muted"),
+                    #    ui.span(f"{old_val:.1f}", class_="fw-medium"),
+                    #    class_="d-flex justify-content-between mb-1"
+                    # ),
                     # Row 3: Second Value
-                    ui.div(
-                        ui.span(f"{max_year}: ", class_="fw-semibold text-muted"),
-                        ui.span(f"{new_val:.1f}", class_="fw-medium"),
-                        class_="d-flex justify-content-between"
-                    ),
+                    # ui.div(
+                    #    ui.span("R²", class_="fw-semibold text-muted"),
+                    #    ui.span(f"{new_val:.1f}", class_="fw-medium"),
+                    #    class_="d-flex justify-content-between"
+                    # ),
                     style="font-size: 0.85em;",
                     class_="lh-sm"
                 ),
