@@ -52,6 +52,10 @@ _SURVEYS = {
         "sv": "Förslag: Sänka rösträttsåldern till 16 år i alla val",
         "en": "Proposal: Lower the voting age to 16 in all elections"
     },
+    "DPAxoXfQk9vciL": {
+        "sv": "Förslag: Mjuka upp arbetsrätten",
+        "en": "Proposal: Liberalize labour legislation"
+    },
     "DRGRvMStYgAX68": {
         "sv": "Förslag: Minska inkomstskillnaderna i samhället",
         "en": "Proposal: Reduce income differences in society"
