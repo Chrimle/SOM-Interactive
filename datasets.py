@@ -112,6 +112,10 @@ _SURVEYS = {
         "sv": "Förslag: Alltid överlåta beslut i viktiga frågor till experter",
         "en": "Proposal: Delegate decisions in important issues to experts"
     },
+    "tmHvZcACa29BLO": {
+        "sv": "Förslag: Sverige bör utträda ur EU",
+        "en": "Proposal: Sweden should withdraw from the EU"
+    },
     "u2FlGAaCPdtXZ0": {
         "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
         "en": "Proposal: Strive towards an environmentally friendly society"
