@@ -84,6 +84,10 @@ _SURVEYS = {
         "sv": "Förslag: Sverige bör på lång sikt avveckla kärnkraften",
         "en": "Proposal: Sweden should in the long run abolish nuclear power"
     },
+    "nkXsAviYMNR566": {
+        "sv": "Förslag: Förbjuda ansiktstäckande slöja på allmän plats",
+        "en": "Proposal: Ban face-covering veils in public places"
+    },
     "u2FlGAaCPdtXZ0": {
         "sv": "Förslag: Satsa mer på ett miljövänligt samhälle",
         "en": "Proposal: Strive towards an environmentally friendly society"
