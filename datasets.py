@@ -64,6 +64,10 @@ _SURVEYS = {
         "sv": "Förslag: Höja koldioxidskatten på bensin",
         "en": "Proposal: Increase the CO2 tax on petrol"
     },
+    "g6xB37wuzX5BZP": {
+        "sv": "Förslag: Stärka homo-, bi- och transsexuellas ställning i samhället",
+        "en": "Proposal: Strengthen the position of homo-, bi- and transsexuals in society"
+    },
     "H21XmkoynT7gjK": {
         "sv": "Förslag: Satsa på miljövänligt samhälle även om det innebär låg tillväxt",
         "en": "Proposal: Strive towards an env. friendly society, even without economic growth"
