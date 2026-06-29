@@ -120,6 +120,10 @@ _SURVEYS = {
         "sv": "Förslag: Sänka skatterna",
         "en": "Proposal: Lower taxes"
     },
+    "YCsw0MLRalJBu1": {
+        "sv": "Förslag: Öka arbetskraftsinvandringen till Sverige",
+        "en": "Proposal: Increase labor migration to Sweden"
+    },
     "ymzgS99s9eEA7P": {
         "sv": "Förslag: Begränsa rätten till fri abort",
         "en": "Proposal: Limit the right to abortion"
