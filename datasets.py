@@ -76,6 +76,10 @@ _SURVEYS = {
         "sv": "Förslag: Satsa på miljövänligt samhälle även om det innebär låg tillväxt",
         "en": "Proposal: Strive towards an env. friendly society, even without economic growth"
     },
+    "icagfmEI6oHPmR": {
+        "sv": "Förslag: Minska den offentliga sektorn",
+        "en": "Proposal: Reduce the public sector"
+    },
     "iLRRtxKKzUFOSF": {
         "sv": "Förslag: Satsa på ett samhälle med ökad jämställdhet mellan kvinnor och män",
         "en": "Proposal: Strive towards a society with greater equality between women and men"
