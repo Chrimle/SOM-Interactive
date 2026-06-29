@@ -36,6 +36,10 @@ class Metadata:
 
 
 _SURVEYS = {
+    "3P7V2u9m6Au4Dm": {
+        "sv": "Förslag: Minska försvarsutgifterna",
+        "en": "Proposal: Reduce defence spending"
+    },
     "5jkTvojUF0ZTIU": {
         "sv": "Förslag: Införa dödstraff för mord",
         "en": "Proposal: Introduce death penalty for murder"
