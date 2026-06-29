@@ -76,6 +76,10 @@ _SURVEYS = {
         "sv": "Förslag: Satsa på ett samhälle med ökad jämställdhet mellan kvinnor och män",
         "en": "Proposal: Strive towards a society with greater equality between women and men"
     },
+    "lLL3Ds0l8KAmIx": {
+        "sv": "Förslag: Införa republik med vald president",
+        "en": "Proposal: Make Sweden a republic with an elected president"
+    },
     "kNH0jjogKxb2yo": {
         "sv": "Förslag: Höja skatterna",
         "en": "Proposal: Raise taxes"
