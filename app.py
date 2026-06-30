@@ -113,12 +113,6 @@ app_ui = ui.page_sidebar(
         ui.output_ui("github_link"),
         bg="#f8f9fa"
     ),
-    ui.head_content(
-        ui.tags.link(
-            rel="stylesheet",
-            href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css"
-        )
-    ),
     ui.div(
         ui.div(
             ui.output_ui("category_selector_container"),
