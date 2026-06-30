@@ -259,12 +259,13 @@ def server(input, output, session):
             if selected_cat_name is None or meta.category.name == selected_cat_name:
                 choices[key] = meta.titles.get(lang, meta.titles.get("sv"))
 
-        try:
-            current_selection = input.selected_survey()
-            if current_selection not in choices:
+        with reactive.isolate():
+            try:
+                current_selection = input.selected_survey()
+                if current_selection not in choices:
+                    current_selection = ""
+            except Exception:
                 current_selection = ""
-        except Exception:
-            current_selection = ""
 
         return ui.input_select(
             "selected_survey",
