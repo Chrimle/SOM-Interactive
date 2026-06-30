@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from pathlib import Path
 from shiny import App, render, ui, reactive
@@ -160,6 +161,9 @@ app_ui = ui.page_sidebar(
     title="SOM Interactive"
 )
 
+# Cache of CSV data
+DATA_CACHE = {}
+
 
 def server(input, output, session):
     # A helper function to quickly look up translations
@@ -172,12 +176,32 @@ def server(input, output, session):
     def is_valid_survey_selected() -> bool:
         return input.selected_survey() != ""
 
+    def load_csv_with_cache(meta) -> pd.DataFrame:
+        """Determines the correct path and ensures the file is only loaded once."""
+        if sys.platform != "emscripten":
+            file_source = Path(__file__).parent / meta.file_path
+        else:
+            import js
+            if js.location.hostname not in ["localhost", "127.0.0.1"]:
+                base_url = "https://raw.githubusercontent.com/Chrimle/SOM-Interactive/main/"
+                file_source = f"{base_url}{meta.file_path}"
+            else:
+                base_local_url = js.location.href.split("/docs/")[0] + "/"
+                file_source = f"{base_local_url}{meta.file_path}"
+
+        # CACHE
+        if meta.survey_id not in DATA_CACHE:
+            DATA_CACHE[meta.survey_id] = pd.read_csv(file_source, encoding="utf-8")
+
+        return DATA_CACHE[meta.survey_id].copy()
+
+    # 2. Your updated reactive calculation
     @reactive.calc
     def current_dataset() -> tuple[pd.DataFrame, Metadata]:
         if not is_valid_survey_selected():
             return None, None
         meta = DATASETS[input.selected_survey()]
-        df = pd.read_csv(meta.file_path, encoding="utf-8")
+        df = load_csv_with_cache(meta)
         return df, meta
 
     @render.ui

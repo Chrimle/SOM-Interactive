@@ -20,7 +20,7 @@ class ValueColumnConfig:
 class Metadata:
     survey_id: str
     titles: dict[str, str]
-    file_path: Path = field(init=False)
+    file_path: str = field(init=False)
     category: Category = Category.PROPOSAL
     choice_col_index: int = 1
     value_columns: list[ValueColumnConfig] = field(
@@ -32,7 +32,7 @@ class Metadata:
     time_col_index: int = 0
 
     def __post_init__(self):
-        self.file_path = Path(__file__).parent / "data" / self.survey_id / "data.csv"
+        self.file_path = f"data/{self.survey_id}/data.csv"
 
 
 _SURVEYS = {
