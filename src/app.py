@@ -31,6 +31,8 @@ I18N = {
         "quick_stats_content_label_part2": " till ",
         "quick_stats_content_value_diff": "Skillnad",
         "year_abbreviated": "år",
+        "load_popup_title": "Hämtar och bearbetar data...",
+        "load_popup_description": "Detta kan ta ett par sekunder.",
         # SOM Provided translations
         "Antal svar": "Antal svar",
         "Procent": "Procent",
@@ -58,6 +60,8 @@ I18N = {
         "quick_stats_content_label_part2": " to ",
         "quick_stats_content_value_diff": "Difference",
         "year_abbreviated": "yr",
+        "load_popup_title": "Fetching and processing data...",
+        "load_popup_description": "This could take a few seconds.",
         # SOM Provided translations
         "Antal svar": "Response Count",  # TODO: find official translation!
         "Procent": "Percent",
@@ -372,175 +376,178 @@ def server(input, output, session):
     def survey_plot():
         if not is_valid_survey_selected():
             return None
-        df, meta = current_dataset()
-        chosen_index = int(input.selected_value_col())
-        # Labels
-        choice_col_label = df.columns[meta.choice_col_index]
-        value_col_label = df.columns[chosen_index]
-        value_display_name = translate(df.columns[chosen_index])
+        with ui.Progress(min=0, max=1) as p:
+            p.set(message=translate("load_popup_title"), detail=translate("load_popup_description"))
 
-        active_config = next((c for c in meta.value_columns if c.column_index == chosen_index), None)
-        value_unit_label = active_config.value_unit if active_config else None
+            df, meta = current_dataset()
+            chosen_index = int(input.selected_value_col())
+            # Labels
+            choice_col_label = df.columns[meta.choice_col_index]
+            value_col_label = df.columns[chosen_index]
+            value_display_name = translate(df.columns[chosen_index])
 
-        time_col_label = df.columns[meta.time_col_index]
-        time_axis_display_name = translate(time_col_label)
+            active_config = next((c for c in meta.value_columns if c.column_index == chosen_index), None)
+            value_unit_label = active_config.value_unit if active_config else None
 
-        chart_type = input.chart_type()
-        show_labels = input.show_labels()
+            time_col_label = df.columns[meta.time_col_index]
+            time_axis_display_name = translate(time_col_label)
 
-        # Filter the dataframe based on the slider input (if it exists)
-        year_range = input.year_range()
-        if year_range is not None:
-            df = df[(df[time_col_label] >= year_range[0]) & (df[time_col_label] <= year_range[1])]
+            chart_type = input.chart_type()
+            show_labels = input.show_labels()
 
-        # Pivot the dataframe
-        plot_df = df.pivot_table(index=time_col_label, columns=choice_col_label, values=value_col_label)
+            # Filter the dataframe based on the slider input (if it exists)
+            year_range = input.year_range()
+            if year_range is not None:
+                df = df[(df[time_col_label] >= year_range[0]) & (df[time_col_label] <= year_range[1])]
 
-        # - Insert Missing Years & Re-index -
-        plot_df.index = plot_df.index.astype(int)
-        if year_range is not None:
-            full_years = range(year_range[0], year_range[1] + 1)
-        elif not plot_df.empty:
-            full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
-        else:
-            full_years = []
-        plot_df = plot_df.reindex(full_years)
-        # ------------------------------------
+            # Pivot the dataframe
+            plot_df = df.pivot_table(index=time_col_label, columns=choice_col_label, values=value_col_label)
 
-        # Dynamically retrieve sorting order from map keys
-        correct_order = list(ANSWER_MAP.keys())
-        existing_order = [cat for cat in correct_order if cat in plot_df.columns]
+            # - Insert Missing Years & Re-index -
+            plot_df.index = plot_df.index.astype(int)
+            if year_range is not None:
+                full_years = range(year_range[0], year_range[1] + 1)
+            elif not plot_df.empty:
+                full_years = range(plot_df.index.min(), plot_df.index.max() + 1)
+            else:
+                full_years = []
+            plot_df = plot_df.reindex(full_years)
+            # ------------------------------------
 
-        # Reorder/Filter the dataframe columns
-        plot_df = plot_df[existing_order]
+            # Dynamically retrieve sorting order from map keys
+            correct_order = list(ANSWER_MAP.keys())
+            existing_order = [cat for cat in correct_order if cat in plot_df.columns]
 
-        # Extract matching color mappings dynamically
-        custom_colors = [ANSWER_MAP.get(cat, {}).get("color", "#757575") for cat in plot_df.columns]
+            # Reorder/Filter the dataframe columns
+            plot_df = plot_df[existing_order]
 
-        # Rename columns using the translation map before plotting
-        plot_df = plot_df.rename(columns={col: translate_answer(col) for col in plot_df.columns})
+            # Extract matching color mappings dynamically
+            custom_colors = [ANSWER_MAP.get(cat, {}).get("color", "#757575") for cat in plot_df.columns]
 
-        fig = go.Figure()
+            # Rename columns using the translation map before plotting
+            plot_df = plot_df.rename(columns={col: translate_answer(col) for col in plot_df.columns})
 
-        # Build Plotly Traces
-        for col, color in zip(plot_df.columns, custom_colors):
-            # Custom hover template ensuring full name alignment alongside its values
-            hovertemplate = (
-                f"<b>{col}</b><br>"
-                f"{value_display_name}: %{{y}} {value_unit_label if value_unit_label is not None else ""}<extra></extra>"
-            )
+            fig = go.Figure()
 
-            if chart_type == "bar":
-                text_labels = [int(v) if pd.notna(v) and v > 0 else "" for v in plot_df[col]] if show_labels else None
-                fig.add_trace(go.Bar(
-                    x=plot_df.index,
-                    y=plot_df[col],
-                    name=col,
-                    marker_color=color,
-                    marker_line=dict(width=1, color="black"),
-                    text=text_labels,
-                    textposition="inside" if show_labels else "none",
-                    hovertemplate=hovertemplate
-                ))
-            elif chart_type == "line":
-                text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
+            # Build Plotly Traces
+            for col, color in zip(plot_df.columns, custom_colors):
+                # Custom hover template ensuring full name alignment alongside its values
+                hovertemplate = (
+                    f"<b>{col}</b><br>"
+                    f"{value_display_name}: %{{y}} {value_unit_label if value_unit_label is not None else ""}<extra></extra>"
+                )
 
-                # TRACE 1: Background dashed line connecting the missing NaN gaps
-                fig.add_trace(go.Scatter(
-                    x=plot_df.index,
-                    y=plot_df[col],
-                    mode='lines',
-                    line=dict(color=color, width=2, dash='dash'),
-                    connectgaps=True,
-                    showlegend=False,
-                    hoverinfo='skip'
-                ))
+                if chart_type == "bar":
+                    text_labels = [int(v) if pd.notna(v) and v > 0 else "" for v in plot_df[col]] if show_labels else None
+                    fig.add_trace(go.Bar(
+                        x=plot_df.index,
+                        y=plot_df[col],
+                        name=col,
+                        marker_color=color,
+                        marker_line=dict(width=1, color="black"),
+                        text=text_labels,
+                        textposition="inside" if show_labels else "none",
+                        hovertemplate=hovertemplate
+                    ))
+                elif chart_type == "line":
+                    text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
 
-                # TRACE 2: Foreground solid line + markers that breaks at NaN gaps
-                fig.add_trace(go.Scatter(
-                    x=plot_df.index,
-                    y=plot_df[col],
-                    mode='lines+markers+text' if show_labels else 'lines+markers',
-                    name=col,
-                    line=dict(color=color, width=2),
-                    marker=dict(size=8),
-                    text=text_labels,
-                    textposition="top center",
-                    hovertemplate=hovertemplate,
-                    connectgaps=False
-                ))
-            elif chart_type == "scatter":
-                text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
-
-                # Base Scatter Markers
-                fig.add_trace(go.Scatter(
-                    x=plot_df.index,
-                    y=plot_df[col],
-                    mode='markers+text' if show_labels else 'markers',
-                    name=col,
-                    marker=dict(color=color, size=8),
-                    text=text_labels,
-                    textposition="top center",
-                    hovertemplate=hovertemplate
-                ))
-
-                valid_data = plot_df[col].dropna()
-                if len(valid_data) > 1:  # Need at least 2 points to draw a line
-                    valid_idx = valid_data.index
-                    valid_vals = valid_data.values
-
-                    # 1D polynomial fit (linear regression)
-                    z = np.polyfit(valid_idx, valid_vals, 1)
-                    p = np.poly1d(z)
-                    trendline_y = p(plot_df.index)
-
-                    # Add Trendline Trace
+                    # TRACE 1: Background dashed line connecting the missing NaN gaps
                     fig.add_trace(go.Scatter(
                         x=plot_df.index,
-                        y=trendline_y,
+                        y=plot_df[col],
                         mode='lines',
-                        name=f"{col} (Trend)",
-                        line=dict(color=color, width=2, dash='dot'),
+                        line=dict(color=color, width=2, dash='dash'),
+                        connectgaps=True,
                         showlegend=False,
                         hoverinfo='skip'
                     ))
 
-        # Layout and Styling
-        fig.update_layout(
-            barmode='stack' if chart_type == "bar" else 'group',
-            yaxis_title=f"{value_display_name} {f"({value_unit_label})" if value_unit_label is not None else ""}",
-            xaxis_title=time_axis_display_name,
-            yaxis=dict(
-                range=[0, None],
-                gridcolor='rgba(0,0,0,0.1)',
-                griddash='dash'
-            ),
-            legend_title_text=choice_col_label,
-            legend=dict(
-                orientation="v",
-                yanchor="top",
-                y=1,
-                xanchor="left",
-                x=1.02
-            ),
-            template="plotly_white",
-            hovermode="x unified",
-            hoverlabel=dict(
-                bgcolor="white",
-                font_size=12,
-                align="left"
-            ),
-            margin=dict(r=30)
-        )
+                    # TRACE 2: Foreground solid line + markers that breaks at NaN gaps
+                    fig.add_trace(go.Scatter(
+                        x=plot_df.index,
+                        y=plot_df[col],
+                        mode='lines+markers+text' if show_labels else 'lines+markers',
+                        name=col,
+                        line=dict(color=color, width=2),
+                        marker=dict(size=8),
+                        text=text_labels,
+                        textposition="top center",
+                        hovertemplate=hovertemplate,
+                        connectgaps=False
+                    ))
+                elif chart_type == "scatter":
+                    text_labels = [int(v) if pd.notna(v) else "" for v in plot_df[col]] if show_labels else None
 
-        # Force categorical x-axis for bars so reindexed missing years display as gaps,
-        # or enforce integer ticks for line charts.
-        if chart_type == "bar":
-            fig.update_xaxes(type='category')
-        else:
-            fig.update_xaxes(dtick=1)
+                    # Base Scatter Markers
+                    fig.add_trace(go.Scatter(
+                        x=plot_df.index,
+                        y=plot_df[col],
+                        mode='markers+text' if show_labels else 'markers',
+                        name=col,
+                        marker=dict(color=color, size=8),
+                        text=text_labels,
+                        textposition="top center",
+                        hovertemplate=hovertemplate
+                    ))
 
-        return fig
+                    valid_data = plot_df[col].dropna()
+                    if len(valid_data) > 1:  # Need at least 2 points to draw a line
+                        valid_idx = valid_data.index
+                        valid_vals = valid_data.values
+
+                        # 1D polynomial fit (linear regression)
+                        z = np.polyfit(valid_idx, valid_vals, 1)
+                        p = np.poly1d(z)
+                        trendline_y = p(plot_df.index)
+
+                        # Add Trendline Trace
+                        fig.add_trace(go.Scatter(
+                            x=plot_df.index,
+                            y=trendline_y,
+                            mode='lines',
+                            name=f"{col} (Trend)",
+                            line=dict(color=color, width=2, dash='dot'),
+                            showlegend=False,
+                            hoverinfo='skip'
+                        ))
+
+            # Layout and Styling
+            fig.update_layout(
+                barmode='stack' if chart_type == "bar" else 'group',
+                yaxis_title=f"{value_display_name} {f"({value_unit_label})" if value_unit_label is not None else ""}",
+                xaxis_title=time_axis_display_name,
+                yaxis=dict(
+                    range=[0, None],
+                    gridcolor='rgba(0,0,0,0.1)',
+                    griddash='dash'
+                ),
+                legend_title_text=choice_col_label,
+                legend=dict(
+                    orientation="v",
+                    yanchor="top",
+                    y=1,
+                    xanchor="left",
+                    x=1.02
+                ),
+                template="plotly_white",
+                hovermode="x unified",
+                hoverlabel=dict(
+                    bgcolor="white",
+                    font_size=12,
+                    align="left"
+                ),
+                margin=dict(r=30)
+            )
+
+            # Force categorical x-axis for bars so reindexed missing years display as gaps,
+            # or enforce integer ticks for line charts.
+            if chart_type == "bar":
+                fig.update_xaxes(type='category')
+            else:
+                fig.update_xaxes(dtick=1)
+
+            return fig
 
     @render.ui
     def quick_stats_header():
