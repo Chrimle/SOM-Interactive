@@ -12,5 +12,6 @@ Interact with [SOM-institute](https://www.gu.se/som-institutet) Data!
 ### Dev Notes
 The Python script is converted to WebAssembly via shiny.
 ```bash
-shinylive export . docs --template-dir template
+cd src/
+shinylive export . ../docs --template-dir template
 ```
