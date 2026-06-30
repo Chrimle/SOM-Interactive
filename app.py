@@ -117,17 +117,7 @@ app_ui = ui.page_sidebar(
         ui.tags.link(
             rel="stylesheet",
             href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css"
-        ),
-        ui.HTML("""
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DJPKJ5B6W7"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-DJPKJ5B6W7');
-        </script>
-        """)
+        )
     ),
     ui.div(
         ui.div(
